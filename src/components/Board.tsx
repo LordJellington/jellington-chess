@@ -1,10 +1,12 @@
 import * as React from 'react';
-import './Hello.css';
-import './chessboard.css';
+import '../styles/app.css';
+import '../styles/chessboard.css';
+import '../styles/bootstrap.css'
 var ChessBoard = require('chessboardjs');
 
 export interface Props {
     placeholder?: string;
+    doSomething: () => void;
 }
 
 class Board extends React.Component<Props, object> {
@@ -20,8 +22,17 @@ class Board extends React.Component<Props, object> {
     public render() {
 
         return (
-            <div id="board" />
-        );
+            <div>
+                <div id="board" />
+                <button 
+                    id="do-something"
+                    className="btn btn-primary"
+                    onClick={this.props.doSomething}
+                >
+                    Do Something
+                </button>
+            </div>
+        );  
 
     }
 

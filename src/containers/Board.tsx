@@ -2,13 +2,25 @@ import * as actions from '../actions/';
 import { StoreState } from '../types/index';
 import * as React from 'react';
 import { connect, Dispatch } from 'react-redux';
+import { BoardHelper } from '../helpers/boardhelper';
 import Board from '../components/Board';
 
 class BoardContainer extends React.Component<any, any> {
 
+    private boardHelper: BoardHelper;
+
+    componentDidMount() {
+        console.log('componentDidMount');
+    }
+
     public render() {
+        if (!this.boardHelper) {
+            this.boardHelper = new BoardHelper();
+        }
         return (
-            <Board />
+            <Board
+                doSomething={this.boardHelper.doSomething}
+            />
         );
     }
 
