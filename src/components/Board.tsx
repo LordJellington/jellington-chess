@@ -1,35 +1,45 @@
 import * as React from 'react';
 import '../styles/app.css';
 import '../styles/chessboard.css';
-import '../styles/bootstrap.css'
-var ChessBoard = require('chessboardjs');
+import '../styles/bootstrap.css';
+import { BoardHelper } from '../helpers/boardhelper';
 
 export interface Props {
     placeholder?: string;
-    doSomething: () => void;
+    helper: BoardHelper;
 }
 
 class Board extends React.Component<Props, object> {
 
     componentDidMount() {
-        ChessBoard('board');
+        this.props.helper.setupBoard();
+        
     }
 
     componentDidUpdate(props: any, prevProps: any) {
-        ChessBoard('board');
+        console.log('componentDidUpdate');
     }
 
     public render() {
+
+        let { helper } = this.props;
 
         return (
             <div>
                 <div id="board" />
                 <button 
-                    id="do-something"
+                    id="startButton"
                     className="btn btn-primary"
-                    onClick={this.props.doSomething}
+                    onClick={helper.start}
                 >
-                    Do Something
+                    Start
+                </button>
+                <button 
+                    id="setPosition"
+                    className="btn"
+                    onClick={helper.setPosition}
+                >
+                    Set Position
                 </button>
             </div>
         );  

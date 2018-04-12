@@ -19,7 +19,7 @@ class BoardContainer extends React.Component<any, any> {
         }
         return (
             <Board
-                doSomething={this.boardHelper.doSomething}
+                helper={this.boardHelper}
             />
         );
     }
