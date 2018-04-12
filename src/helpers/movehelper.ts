@@ -2,6 +2,13 @@ declare var $: any;
 
 export class MoveHelper {
 
+    private board: any;
+    private game: any;
+
+    public constructor(board: any, game: any) {
+        this.board = board;
+        this.game = game;
+    }
     
     var removeGreySquares = function() {
         $('#board .square-55d63').css('background', '');
