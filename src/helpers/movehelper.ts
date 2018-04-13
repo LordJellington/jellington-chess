@@ -9,7 +9,9 @@ export class MoveHelper {
         this.board = board;
         this.game = game;
     }
-    
+
+    // see http://chessboardjs.com/examples#5003
+
     var removeGreySquares = function() {
         $('#board .square-55d63').css('background', '');
       };
