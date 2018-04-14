@@ -12,8 +12,7 @@ export interface Props {
 class Board extends React.Component<Props, object> {
 
     componentDidMount() {
-        this.props.helper.setupBoard();
-        
+        console.log('componentDidMount');
     }
 
     componentDidUpdate(props: any, prevProps: any) {
