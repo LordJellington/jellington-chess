@@ -1,4 +1,4 @@
-// import store from '../store/store'; TODO: reinstate when I need it
+import store from '../store/store';
 import { MoveHelper } from './movehelper';
 var ChessBoard = require('chessboardjs');
 var Chess = require('chess.js');

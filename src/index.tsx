@@ -1,7 +1,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import store from './store/store';
-import Board from './containers/Board';
+import App from './App';
 import { Provider } from 'react-redux';
 import registerServiceWorker from './registerServiceWorker';
 import './index.css';
@@ -12,7 +12,7 @@ declare var $: any;
 $(document).ready(function() {
   ReactDOM.render(
     <Provider store={store}>
-      <Board />
+      <App />
     </Provider>,
     document.getElementById('root') as HTMLElement
   );

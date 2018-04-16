@@ -3,3 +3,9 @@ export type INCREMENT_ENTHUSIASM = typeof INCREMENT_ENTHUSIASM;
 
 export const DECREMENT_ENTHUSIASM = 'DECREMENT_ENTHUSIASM';
 export type DECREMENT_ENTHUSIASM = typeof DECREMENT_ENTHUSIASM;
+
+export const SET_BOARD = 'SET_BOARD';
+export type SET_BOARD = typeof SET_BOARD;
+
+export const SET_PHASE = 'SET_PHASE';
+export type SET_PHASE = typeof SET_PHASE;

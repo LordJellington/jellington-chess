@@ -12,11 +12,11 @@ export interface Props {
 class Board extends React.Component<Props, object> {
 
     componentDidMount() {
-        console.log('componentDidMount');
+        console.log('Board componentDidMount');
     }
 
     componentDidUpdate(props: any, prevProps: any) {
-        console.log('componentDidUpdate');
+        console.log('Board componentDidUpdate');
     }
 
     public render() {
@@ -26,13 +26,6 @@ class Board extends React.Component<Props, object> {
         return (
             <div>
                 <div id="board" />
-                <button 
-                    id="startButton"
-                    className="btn btn-primary"
-                    onClick={helper.start}
-                >
-                    Start
-                </button>
                 <button 
                     id="setPosition"
                     className="btn"

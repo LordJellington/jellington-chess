@@ -1,9 +1,12 @@
 import * as React from 'react';
 import './App.css';
+import Board from './containers/Board';
+
 
 const logo = require('./logo.svg');
 
 class App extends React.Component {
+  
   render() {
     return (
       <div className="App">

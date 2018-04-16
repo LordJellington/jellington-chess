@@ -1,3 +1,6 @@
+import store from '../store/store';
+import { GamePhase } from '../types/index';
+
 declare var $: any;
 
 export class MoveHelper {
@@ -31,9 +34,14 @@ export class MoveHelper {
   }
 
   onDragStart = (source: any, piece: any) => {
+
+    let gamePhase = store.getState().gamePhase;
+
     // do not pick up pieces if the game is over
     // or if it's not that side's turn
-    if (this.game.game_over() === true ||
+    if (
+      (gamePhase !== GamePhase.PLAYER_TURN && gamePhase !== GamePhase.PLACEMENT) ||
+      this.game.game_over() === true ||
       (this.game.turn() === 'w' && piece.search(/^b/) !== -1) ||
       (this.game.turn() === 'b' && piece.search(/^w/) !== -1)) {
       return false;
@@ -49,7 +57,7 @@ export class MoveHelper {
     var move = this.game.move({
       from: source,
       to: target,
-      promotion: 'q' // NOTE: always promote to a queen for example simplicity
+      // promotion: 'q' // NOTE: always promote to a queen for example simplicity, not using this in my version
     });
 
     // illegal move
@@ -87,6 +95,11 @@ export class MoveHelper {
 
   onSnapEnd = () => {
     this.board.position(this.game.fen());
+  }
+
+  onMoveEnd = (oldPosition: any, newPosition: any) => {
+    // TODO: set whose turn it is based on the state (PLAYER_TURN or AI_TURN)
+    // this will involve getting a string representation of the board (i.e. fen), adjusting it to alter whose turn it is, and then updating the board
   }
 
 }
