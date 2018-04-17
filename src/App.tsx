@@ -1,25 +1,29 @@
+import { StoreState, GamePhase } from './types/index';
 import * as React from 'react';
+import { connect } from 'react-redux';
+import BoardContainer from './containers/Board';
+import TitleContainer from './containers/Title';
+import GameOverContainer from './containers/GameOver';
 import './App.css';
-import Board from './containers/Board';
 
-
-const logo = require('./logo.svg');
-
-class App extends React.Component {
+class App extends React.Component<any, any> {
   
   render() {
+    let { gamePhase } = this.props;
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
-        </header>
-        <p className="App-intro">
-          To get started, edit <code>src/App.tsx</code> and save to reload.
-        </p>
+        {gamePhase === GamePhase.TITLE && <TitleContainer/>}
+        {(gamePhase === GamePhase.PLACEMENT || gamePhase === GamePhase.AI_TURN || gamePhase === GamePhase.PLAYER_TURN) && <BoardContainer />}
+        {gamePhase === GamePhase.GAME_OVER && <GameOverContainer />}
       </div>
     );
   }
 }
 
-export default App;
+export function mapStateToProps ({gamePhase}: StoreState) {
+  return {
+      gamePhase
+  };
+}
+
+export default connect(mapStateToProps)(App);

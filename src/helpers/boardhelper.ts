@@ -1,4 +1,4 @@
-import store from '../store/store';
+// import store from '../store/store';
 import { MoveHelper } from './movehelper';
 var ChessBoard = require('chessboardjs');
 var Chess = require('chess.js');
@@ -23,7 +23,8 @@ export class BoardHelper {
             onDrop: this.moveHelper.onDrop,
             onMouseoutSquare: this.moveHelper.onMouseoutSquare,
             onMouseoverSquare: this.moveHelper.onMouseoverSquare,
-            onSnapEnd: this.moveHelper.onSnapEnd
+            onSnapEnd: this.moveHelper.onSnapEnd,
+            onChange: this.moveHelper.onChange
         });
         this.moveHelper.setBoard(this.board);
         this.board.start();

@@ -7,9 +7,11 @@ export class MoveHelper {
 
   private board: any;
   private game: any;
+  private ignoreNextChange: boolean;
 
   public constructor(game: any) {
     this.game = game;
+    this.ignoreNextChange = false;
   }
 
   setBoard = (board: any) => {
@@ -64,8 +66,12 @@ export class MoveHelper {
     if (move === null) {
       return 'snapback';
     }
+    
+    this.board.move(source, target);
 
-    return true; // TODO: may need to return something else, or remove this line altogether
+    this.ignoreNextChange = false;
+
+    return '';
   }
 
   onMouseoverSquare = (square: any, piece: any) => {
@@ -97,9 +103,20 @@ export class MoveHelper {
     this.board.position(this.game.fen());
   }
 
-  onMoveEnd = (oldPosition: any, newPosition: any) => {
-    // TODO: set whose turn it is based on the state (PLAYER_TURN or AI_TURN)
-    // this will involve getting a string representation of the board (i.e. fen), adjusting it to alter whose turn it is, and then updating the board
+  onChange = (oldPosition: any, newPosition: any) => {
+
+    if (!this.ignoreNextChange) {
+
+      this.ignoreNextChange = true;
+      let fenArray: string[] = this.game.fen().split(' ');
+      fenArray[1] = 'w'; // keep it as white's move
+      fenArray[3] = '-'; // no en passant
+      let newFen: string = fenArray.join(' ');
+      this.game.load(newFen);
+      this.board.position(newFen);
+      
+    }
+
   }
 
 }

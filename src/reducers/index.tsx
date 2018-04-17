@@ -1,22 +1,16 @@
-import { EnthusiasmAction } from '../actions';
 import { StoreState, GamePhase } from '../types/index';
-import { INCREMENT_ENTHUSIASM, DECREMENT_ENTHUSIASM, SET_BOARD, SET_PHASE } from '../constants/index';
+import { SET_BOARD, SET_PHASE } from '../constants/index';
 import { CommonHelper } from '../helpers/commonhelper';
 
-export function enthusiasm(state: StoreState, action: EnthusiasmAction): StoreState {
+let setPhase = (state: StoreState, gamePhase: GamePhase) => {
+    state.gamePhase = gamePhase;
+    return state;
+};
 
-    switch (action.type) {
-        
-        case INCREMENT_ENTHUSIASM:
-            return { ...state, enthusiasmLevel: state.enthusiasmLevel + 1 };
-        case DECREMENT_ENTHUSIASM:
-            return { ...state, enthusiasmLevel: Math.max(1, state.enthusiasmLevel - 1) };
-        default: 
-            return { ...state };
-
-    }
-
-} 
+let setBoard = (state: StoreState, boardState: string) => {
+    state.boardState = boardState;
+    return state;
+};
 
 export function chessInvasion(state: StoreState, action: any): StoreState {
 
@@ -25,6 +19,7 @@ export function chessInvasion(state: StoreState, action: any): StoreState {
     switch (action.type) {
         case SET_BOARD:
             cloneState = setBoard(cloneState, action.boardState);
+            break;
         case SET_PHASE:
             cloneState = setPhase(cloneState, action.gamePhase);
             break;
@@ -34,14 +29,4 @@ export function chessInvasion(state: StoreState, action: any): StoreState {
 
     return cloneState;
 
-}
-
-let setPhase = (state: StoreState, gamePhase: GamePhase) => {
-    state.gamePhase = gamePhase;
-    return state;
-} 
-
-let setBoard = (state: StoreState, boardState: string) => {
-    state.boardState = boardState;
-    return state;
 }

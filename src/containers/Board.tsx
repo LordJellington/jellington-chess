@@ -1,4 +1,3 @@
-import * as actions from '../actions/';
 import { StoreState } from '../types/index';
 import * as React from 'react';
 import { connect } from 'react-redux';
@@ -26,11 +25,8 @@ class BoardContainer extends React.Component<any, any> {
 
 }
 
-export function mapStateToProps ({enthusiasmLevel, languageName}: StoreState) {
-    return {
-        enthusiasmLevel,
-        name: languageName
-    };
+export function mapStateToProps (storeState: StoreState) {
+    return {};
 }
 
 export default connect(mapStateToProps)(BoardContainer);

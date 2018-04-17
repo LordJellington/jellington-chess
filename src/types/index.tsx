@@ -7,8 +7,6 @@ export enum GamePhase {
 }
 
 export interface StoreState {
-    languageName: string;
-    enthusiasmLevel: number;
     boardState: string | null;
     gamePhase: GamePhase;
 }

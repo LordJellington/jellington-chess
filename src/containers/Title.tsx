@@ -1,9 +1,9 @@
 import store from '../store/store';
 import { StoreState, GamePhase } from '../types/index';
 import * as React from 'react';
-import { connect, Dispatch } from 'react-redux';
+import { connect } from 'react-redux';
 import Title from '../components/Title';
-import { SET_PHASE } from '../constants/index'
+import { SET_PHASE } from '../constants/index';
 
 class TitleContainer extends React.Component<any, any> {
 
@@ -11,12 +11,12 @@ class TitleContainer extends React.Component<any, any> {
 
         return (
             <Title 
-                title='Chess Invasion!'
+                title="Chess Invasion!"
                 onStartClick={
                     () => {
                         store.dispatch({
                             type: SET_PHASE,
-                            phase: GamePhase.IN_GAME 
+                            gamePhase: GamePhase.PLACEMENT 
                         });
                     }
                 }
@@ -27,7 +27,7 @@ class TitleContainer extends React.Component<any, any> {
 
 }
 
-export function mapStateToProps (store: StoreState) {
+export function mapStateToProps (localStore: StoreState) {
     return {};
 }
 

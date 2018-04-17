@@ -1,10 +1,8 @@
 import { createStore } from 'redux';
-import { enthusiasm } from '../reducers/index';
+import { chessInvasion } from '../reducers/index';
 import { StoreState, GamePhase } from '../types/index';
 
-const store = createStore<StoreState>(enthusiasm, {
-    enthusiasmLevel: 1,
-    languageName: 'TypeScript',
+const store = createStore<StoreState>(chessInvasion, {
     boardState: null,
     gamePhase: GamePhase.TITLE,
     
