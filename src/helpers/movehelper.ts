@@ -69,9 +69,18 @@ export class MoveHelper {
     
     this.board.move(source, target);
 
-    this.ignoreNextChange = false;
+    this.setNextTurnTaker('w');
 
     return '';
+  }
+
+  setNextTurnTaker = (nextTurnTaker: string) => {
+    let fenArray: string[] = this.game.fen().split(' ');
+    fenArray[1] = nextTurnTaker; // keep it as white's move
+    fenArray[3] = '-'; // no en passant
+    let newFen: string = fenArray.join(' ');
+    this.game.load(newFen);
+    this.board.position(newFen);
   }
 
   onMouseoverSquare = (square: any, piece: any) => {
@@ -108,12 +117,7 @@ export class MoveHelper {
     if (!this.ignoreNextChange) {
 
       this.ignoreNextChange = true;
-      let fenArray: string[] = this.game.fen().split(' ');
-      fenArray[1] = 'w'; // keep it as white's move
-      fenArray[3] = '-'; // no en passant
-      let newFen: string = fenArray.join(' ');
-      this.game.load(newFen);
-      this.board.position(newFen);
+      
       
     }
 

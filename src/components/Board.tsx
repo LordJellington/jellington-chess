@@ -27,11 +27,17 @@ class Board extends React.Component<Props, object> {
             <div>
                 <div id="board" />
                 <button 
-                    id="setPosition"
+                    id="btnResetTurn"
                     className="btn"
-                    onClick={helper.setPosition}
+                    onClick={helper.resetTurn}
                 >
-                    Set Position
+                    Reset Turn
+                </button>
+                <button
+                    id="btnSubmitTurn"
+                    className="btn btn-primary"
+                    onClick={helper.submitTurn}
+                >
                 </button>
             </div>
         );  

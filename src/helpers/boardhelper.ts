@@ -1,4 +1,4 @@
-// import store from '../store/store';
+import store from '../store/store';
 import { MoveHelper } from './movehelper';
 var ChessBoard = require('chessboardjs');
 var Chess = require('chess.js');
@@ -28,6 +28,21 @@ export class BoardHelper {
         });
         this.moveHelper.setBoard(this.board);
         this.board.start();
+    }
+
+    public resetTurn = (): void => {
+        // TODO: dispatch action to clear piecesThatHaveMoved
+        
+        let boardStateAtTurnStart: string | null = store.getState().boardStateAtTurnStart;    
+        this.chess.load(boardStateAtTurnStart);
+        this.board.position(boardStateAtTurnStart);
+    }
+
+    public submitTurn = (): void => {
+        // TODO: dispatch submit turn action
+        console.log('submit turn');
+
+        // TODO: call handler for AI's turn
     }
 
     public randomMove = (): void => {
