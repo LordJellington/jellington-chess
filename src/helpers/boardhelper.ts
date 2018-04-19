@@ -1,5 +1,7 @@
 import store from '../store/store';
 import { MoveHelper } from './movehelper';
+import { RESET_PIECES_THAT_HAVE_MOVED_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START } from '../constants/index';
+import { GamePhase } from '../types/index';
 var ChessBoard = require('chessboardjs');
 var Chess = require('chess.js');
 
@@ -31,18 +33,40 @@ export class BoardHelper {
     }
 
     public resetTurn = (): void => {
-        // TODO: dispatch action to clear piecesThatHaveMoved
+
+        store.dispatch({
+            type: RESET_PIECES_THAT_HAVE_MOVED_ON_CURRENT_TURN
+        });
         
         let boardStateAtTurnStart: string | null = store.getState().boardStateAtTurnStart;    
         this.chess.load(boardStateAtTurnStart);
         this.board.position(boardStateAtTurnStart);
+
     }
 
     public submitTurn = (): void => {
-        // TODO: dispatch submit turn action
-        console.log('submit turn');
+        
+        this.moveHelper.setNextTurnTaker('b');
+        store.dispatch({
+            type: SET_PHASE,
+            gamePhase: GamePhase.AI_TURN
+        });
+        this.moveHelper.makeAIMoves();
 
-        // TODO: call handler for AI's turn
+        // move back to players turn
+        this.moveHelper.setNextTurnTaker('w');
+        store.dispatch({
+            type: SET_PHASE,
+            gamePhase: GamePhase.PLAYER_TURN
+        });
+        store.dispatch({
+            type: RESET_PIECES_THAT_HAVE_MOVED_ON_CURRENT_TURN
+        });
+        store.dispatch({
+            type: SET_BOARD_STATE_AT_TURN_START,
+            boardStateAtTurnStart: this.chess.fen()
+        });
+
     }
 
     public randomMove = (): void => {

@@ -7,11 +7,9 @@ export class MoveHelper {
 
   private board: any;
   private game: any;
-  private ignoreNextChange: boolean;
 
   public constructor(game: any) {
     this.game = game;
-    this.ignoreNextChange = false;
   }
 
   setBoard = (board: any) => {
@@ -37,19 +35,22 @@ export class MoveHelper {
 
   onDragStart = (source: any, piece: any) => {
 
-    let gamePhase = store.getState().gamePhase;
+    let { gamePhase, piecesThatHaveMovedOnCurrentTurn } = store.getState();
 
     // do not pick up pieces if the game is over
-    // or if it's not that side's turn
+    // or if it's not the player's turn
+    // or if that piece has moved before on the current turn
     if (
       (gamePhase !== GamePhase.PLAYER_TURN && gamePhase !== GamePhase.PLACEMENT) ||
       this.game.game_over() === true ||
       (this.game.turn() === 'w' && piece.search(/^b/) !== -1) ||
-      (this.game.turn() === 'b' && piece.search(/^w/) !== -1)) {
+      (this.game.turn() === 'b' && piece.search(/^w/) !== -1) ||
+      piecesThatHaveMovedOnCurrentTurn.indexOf(piece) >= 0
+     ) {
       return false;
     }
 
-    return true; // TODO: may need to return something else, or remove this line altogether
+    return true;
   }
 
   onDrop = (source: any, target: any) => {
@@ -59,7 +60,6 @@ export class MoveHelper {
     var move = this.game.move({
       from: source,
       to: target,
-      // promotion: 'q' // NOTE: always promote to a queen for example simplicity, not using this in my version
     });
 
     // illegal move
@@ -114,12 +114,17 @@ export class MoveHelper {
 
   onChange = (oldPosition: any, newPosition: any) => {
 
-    if (!this.ignoreNextChange) {
+    console.log('onChange', oldPosition, newPosition);
 
-      this.ignoreNextChange = true;
-      
-      
-    }
+  }
+
+  makeAIMoves = () => {
+
+    console.log('move AI pieces on the board')
+
+    console.log('add new AI pieces');
+
+
 
   }
 

@@ -17,12 +17,12 @@ let addMovedPiece = (state: StoreState, pieceThatMoved: string): StoreState => {
     pieces.push(pieceThatMoved);
     state.piecesThatHaveMovedOnCurrentTurn = pieces.join(' ');
     return state;
-}
+};
 
 let resetPiecesThatHaveMovedOnCurrentTurn = (state: StoreState): StoreState => {
     state.piecesThatHaveMovedOnCurrentTurn = '';
     return state;
-}
+};
 
 export function chessInvasion(state: StoreState, action: any): StoreState {
 
@@ -34,6 +34,12 @@ export function chessInvasion(state: StoreState, action: any): StoreState {
             break;
         case SET_PHASE:
             cloneState = setPhase(cloneState, action.gamePhase);
+            break;
+        case ADD_MOVED_PIECE:
+            cloneState = addMovedPiece(cloneState, action.pieceThatMoved);
+            break;
+        case RESET_PIECES_THAT_HAVE_MOVED_ON_CURRENT_TURN:
+            cloneState = resetPiecesThatHaveMovedOnCurrentTurn(cloneState);
             break;
         default:
             break; 
