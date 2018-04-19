@@ -1,6 +1,6 @@
 import store from '../store/store';
 import { MoveHelper } from './movehelper';
-import { RESET_PIECES_THAT_HAVE_MOVED_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START } from '../constants/index';
+import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START } from '../constants/index';
 import { GamePhase } from '../types/index';
 var ChessBoard = require('chessboardjs');
 var Chess = require('chess.js');
@@ -17,6 +17,7 @@ export class BoardHelper {
 
     public start = (): void => {
         this.chess = new Chess();
+
         this.moveHelper = new MoveHelper(this.chess);
         this.board = ChessBoard('board', {
             draggable: true,
@@ -30,12 +31,22 @@ export class BoardHelper {
         });
         this.moveHelper.setBoard(this.board);
         this.board.start();
+
+        this.chess.load('8/8/8/8/8/8/8/8 w - - 0 1'); // empty board
+        this.board.position(this.chess.fen());
+
+        // set initial board state
+        this.chess.put({ type: this.chess.BISHOP, color: this.chess.WHITE }, 'c1');
+        this.chess.put({ type: this.chess.KNIGHT, color: this.chess.WHITE }, 'd1');
+        this.chess.put({ type: this.chess.QUEEN, color: this.chess.WHITE }, 'e1');
+        this.chess.put({ type: this.chess.ROOK, color: this.chess.WHITE }, 'f1');
+        this.board.position(this.chess.fen());
     }
 
     public resetTurn = (): void => {
 
         store.dispatch({
-            type: RESET_PIECES_THAT_HAVE_MOVED_ON_CURRENT_TURN
+            type: RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN
         });
         
         let boardStateAtTurnStart: string | null = store.getState().boardStateAtTurnStart;    
@@ -60,7 +71,7 @@ export class BoardHelper {
             gamePhase: GamePhase.PLAYER_TURN
         });
         store.dispatch({
-            type: RESET_PIECES_THAT_HAVE_MOVED_ON_CURRENT_TURN
+            type: RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN
         });
         store.dispatch({
             type: SET_BOARD_STATE_AT_TURN_START,

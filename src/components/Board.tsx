@@ -38,6 +38,7 @@ class Board extends React.Component<Props, object> {
                     className="btn btn-primary"
                     onClick={helper.submitTurn}
                 >
+                    Submit Turn
                 </button>
             </div>
         );  

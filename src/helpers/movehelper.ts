@@ -1,5 +1,6 @@
 import store from '../store/store';
 import { GamePhase } from '../types/index';
+import { ADD_SQUARE_MOVED_TO } from '../constants/index';
 
 declare var $: any;
 
@@ -33,20 +34,40 @@ export class MoveHelper {
     squareEl.css('background', background);
   }
 
-  onDragStart = (source: any, piece: any) => {
+  invalidMove = (source: any, piece: any, target?: any): boolean => {
+    
+    let { gamePhase, squaresMovedToOnCurrentTurn } = store.getState();
+    
+    if (gamePhase === GamePhase.PLAYER_TURN) {
 
-    let { gamePhase, piecesThatHaveMovedOnCurrentTurn } = store.getState();
-
-    // do not pick up pieces if the game is over
-    // or if it's not the player's turn
-    // or if that piece has moved before on the current turn
-    if (
+      return !piece || 
       (gamePhase !== GamePhase.PLAYER_TURN && gamePhase !== GamePhase.PLACEMENT) ||
       this.game.game_over() === true ||
       (this.game.turn() === 'w' && piece.search(/^b/) !== -1) ||
       (this.game.turn() === 'b' && piece.search(/^w/) !== -1) ||
-      piecesThatHaveMovedOnCurrentTurn.indexOf(piece) >= 0
-     ) {
+      squaresMovedToOnCurrentTurn.indexOf(source) >= 0;
+
+    } else if (gamePhase === GamePhase.PLACEMENT) {
+
+      return +target.charAt(1) > 2 || // target is not in first two rows
+        !!this.game.get(target); // there is a piece occupying the target square
+
+    }
+
+    return true;
+
+    // a piece cannot move if:
+    // the game is over
+    // it's not the player's turn
+    // that piece has moved before on the current turn
+
+  }
+
+  onDragStart = (source: any, piece: any) => {
+
+    let { gamePhase } = store.getState();
+
+    if (gamePhase === GamePhase.PLAYER_TURN && this.invalidMove(source, piece)) {
       return false;
     }
 
@@ -54,24 +75,58 @@ export class MoveHelper {
   }
 
   onDrop = (source: any, target: any) => {
+    
+    let { gamePhase } = store.getState();
+    
     this.removeGreySquares();
 
-    // see if the move is legal
-    var move = this.game.move({
-      from: source,
-      to: target,
-    });
+    if (gamePhase === GamePhase.PLAYER_TURN) {
+      // see if the move is legal
+      var move = this.game.move({
+        from: source,
+        to: target,
+      });
 
-    // illegal move
-    if (move === null) {
-      return 'snapback';
+      // illegal move
+      if (move === null) {
+        return 'snapback';
+      }
+
+      this.board.move(source, target);
+      store.dispatch({
+        type: ADD_SQUARE_MOVED_TO,
+        squareMovedTo: target
+      });
+  
+      this.setNextTurnTaker('w');
+
+      return '';
+
+    } else if (gamePhase === GamePhase.PLACEMENT) {
+      
+      if (this.invalidMove(source, null, target)) {
+
+        return 'snapback';
+
+      } else {
+
+        this.board.move(source, target);
+        return '';
+
+      }
+
     }
-    
-    this.board.move(source, target);
-
-    this.setNextTurnTaker('w');
 
     return '';
+
+  }
+
+  setBoardPosition = (newBoardPosition: string) => {
+    let fenArray: string[] = this.game.fen().split(' ');
+    fenArray[0] = newBoardPosition;
+    let newFen: string = fenArray.join(' ');
+    this.game.load(newFen);
+    this.board.position(newFen, false);
   }
 
   setNextTurnTaker = (nextTurnTaker: string) => {
@@ -80,27 +135,39 @@ export class MoveHelper {
     fenArray[3] = '-'; // no en passant
     let newFen: string = fenArray.join(' ');
     this.game.load(newFen);
-    this.board.position(newFen);
+    this.board.position(newFen, false);
   }
 
   onMouseoverSquare = (square: any, piece: any) => {
-    // get list of possible moves for this square
-    let moves = this.game.moves({
-      square: square,
-      verbose: true
-    });
 
-    // exit if there are no moves available for this square
-    if (moves.length === 0) {
-      return;
-    }
+    let { gamePhase } = store.getState();
 
-    // highlight the square they moused over
-    this.greySquare(square);
+    if (gamePhase === GamePhase.PLAYER_TURN) {
 
-    // highlight the possible squares for this piece
-    for (var i = 0; i < moves.length; i++) {
-      this.greySquare(moves[i].to);
+      // get list of possible moves for this square
+      let moves = this.invalidMove(square, piece) ? [] : 
+        this.game.moves({
+          square: square,
+          verbose: true
+        });
+
+      // exit if there are no moves available for this square
+      if (moves.length === 0) {
+        return;
+      }
+
+      // highlight the square they moused over
+      this.greySquare(square);
+
+      // highlight the possible squares for this piece
+      for (var i = 0; i < moves.length; i++) {
+        this.greySquare(moves[i].to);
+      }
+
+    } else if (gamePhase === GamePhase.PLACEMENT) {
+      
+      // TODO: highlight all unoccupied squares in the first row
+
     }
   }
 
@@ -109,7 +176,19 @@ export class MoveHelper {
   }
 
   onSnapEnd = () => {
-    this.board.position(this.game.fen());
+    
+    let { gamePhase } = store.getState();
+    
+    if (gamePhase === GamePhase.PLACEMENT) {
+
+      this.setBoardPosition(this.board.fen());
+    
+    } else if (gamePhase === GamePhase.PLAYER_TURN) {
+    
+      this.board.position(this.game.fen());
+    
+    }
+
   }
 
   onChange = (oldPosition: any, newPosition: any) => {
@@ -120,11 +199,9 @@ export class MoveHelper {
 
   makeAIMoves = () => {
 
-    console.log('move AI pieces on the board')
+    console.log('move AI pieces on the board');
 
     console.log('add new AI pieces');
-
-
 
   }
 

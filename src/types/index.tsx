@@ -9,5 +9,5 @@ export enum GamePhase {
 export interface StoreState {
     boardStateAtTurnStart: string | null;
     gamePhase: GamePhase;
-    piecesThatHaveMovedOnCurrentTurn: string;
+    squaresMovedToOnCurrentTurn: string;
 }
