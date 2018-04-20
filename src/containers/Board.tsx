@@ -19,6 +19,7 @@ class BoardContainer extends React.Component<any, any> {
         return (
             <Board
                 helper={this.boardHelper}
+                gamePhase={this.props.gamePhase}
             />
         );
     }
@@ -26,7 +27,9 @@ class BoardContainer extends React.Component<any, any> {
 }
 
 export function mapStateToProps (storeState: StoreState) {
-    return {};
+    return {
+        gamePhase: storeState.gamePhase
+    };
 }
 
 export default connect(mapStateToProps)(BoardContainer);

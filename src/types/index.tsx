@@ -10,4 +10,6 @@ export interface StoreState {
     boardStateAtTurnStart: string | null;
     gamePhase: GamePhase;
     squaresMovedToOnCurrentTurn: string;
+    aiPiecesAdded: string[];
+    roundNumber: number;
 }

@@ -2,3 +2,12 @@
     width: 400px;
     height: 400px;
 }
+
+.instructions-wrapper {
+    margin-top: 50px;
+}
+
+.instructions-wrapper .instructions {
+    display: none;
+    text-align: left;
+}

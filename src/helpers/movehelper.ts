@@ -165,8 +165,21 @@ export class MoveHelper {
       }
 
     } else if (gamePhase === GamePhase.PLACEMENT) {
+
+      // exit if mouseovered square is not occupied
+      if (!this.game.get(square)) {
+        return;
+      }
       
-      // TODO: highlight all unoccupied squares in the first row
+      let rows: string[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+      for (let j: number = 0; j < rows.length; j++) {
+        for (let k: number = 1; k <= 2; k++) {
+          let target: string = rows[j] + k.toString();
+          if (!this.game.get(target)) {
+            this.greySquare(target);
+          }
+        }
+      }
 
     }
   }

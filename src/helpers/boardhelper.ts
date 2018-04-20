@@ -1,6 +1,6 @@
 import store from '../store/store';
 import { MoveHelper } from './movehelper';
-import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START } from '../constants/index';
+import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER } from '../constants/index';
 import { GamePhase } from '../types/index';
 var ChessBoard = require('chessboardjs');
 var Chess = require('chess.js');
@@ -57,26 +57,20 @@ export class BoardHelper {
 
     public submitTurn = (): void => {
         
-        this.moveHelper.setNextTurnTaker('b');
-        store.dispatch({
-            type: SET_PHASE,
-            gamePhase: GamePhase.AI_TURN
-        });
+        this.setAsAITurn();
         this.moveHelper.makeAIMoves();
+        this.addAIPieces();
+        this.setAsPlayersTurn();
+        this.incrementTurnNumber();
 
-        // move back to players turn
-        this.moveHelper.setNextTurnTaker('w');
-        store.dispatch({
-            type: SET_PHASE,
-            gamePhase: GamePhase.PLAYER_TURN
-        });
-        store.dispatch({
-            type: RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN
-        });
-        store.dispatch({
-            type: SET_BOARD_STATE_AT_TURN_START,
-            boardStateAtTurnStart: this.chess.fen()
-        });
+    }
+
+    public submitPlacement = (): void => {
+
+        this.setAsAITurn();
+        this.addAIPieces();
+        this.setAsPlayersTurn();
+        this.incrementTurnNumber();
 
     }
 
@@ -96,6 +90,52 @@ export class BoardHelper {
             }, 
             true
         );
+    }
+
+    private incrementTurnNumber = (): void => {
+        store.dispatch({
+            type: INCREMENT_TURN_NUMBER
+        });
+    }
+
+    private addAIPieces = (): void => {
+    
+        // TODO: determine the number of AI pieces to add to the board (e.g. 4 pieces on turn 1, then vary it after that)
+
+        // TODO: find all of the squares in the top row that don't have an AI piece in them
+
+        // TODO: add the pieces to the squares
+
+        // TODO: tell the state of the pieces that were added for its log
+
+    }
+
+    private setAsPlayersTurn = (): void => {
+
+        // move back to players turn
+        this.moveHelper.setNextTurnTaker('w');
+        store.dispatch({
+            type: SET_PHASE,
+            gamePhase: GamePhase.PLAYER_TURN
+        });
+        store.dispatch({
+            type: RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN
+        });
+        store.dispatch({
+            type: SET_BOARD_STATE_AT_TURN_START,
+            boardStateAtTurnStart: this.chess.fen()
+        });
+
+    }
+
+    private setAsAITurn = (): void => {
+     
+        this.moveHelper.setNextTurnTaker('b');
+        store.dispatch({
+            type: SET_PHASE,
+            gamePhase: GamePhase.AI_TURN
+        });
+
     }
 
 }
