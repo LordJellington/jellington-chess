@@ -213,7 +213,7 @@ export class MoveHelper {
   makeAIMoves = () => {
 
     // check possible moves for each AI piece
-    let columns: string[] = 'a,b,c,d,e,f,g,h'.split(',');
+    let columns: string[] = 'a,b,c,d,e,f,g,h'.split(','); // TODO: exclude a, because if any AI pieces end up here then a life (or the game) is lost for the player
     for (let i = 0; i < columns.length; i++) {
       for (let j = 1; j <= 8; j++) {
         let square: string = columns[i] + j.toString();
