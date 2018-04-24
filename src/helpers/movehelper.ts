@@ -226,7 +226,7 @@ export class MoveHelper {
           // make a move for each AI piece
           if (possibleMoves && possibleMoves.length) {
       
-            // TODO: work out the length of each possible move
+            // TODO: work out the length of each possible move with a map function
 
             // TODO: remove those that are too long for this game (i.e. greater than 4 spaces)
 
