@@ -1,6 +1,6 @@
 import store from '../store/store';
 import { MoveHelper } from './movehelper';
-import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER } from '../constants/index';
+import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED } from '../constants/index';
 import { GamePhase } from '../types/index';
 var ChessBoard = require('chessboardjs');
 var Chess = require('chess.js');
@@ -59,6 +59,9 @@ export class BoardHelper {
         
         this.setAsAITurn();
         this.moveHelper.makeAIMoves();
+
+        // TODO: synchronise this.board and this.chess
+
         this.addAIPieces();
         this.setAsPlayersTurn();
         this.incrementTurnNumber();
@@ -100,13 +103,44 @@ export class BoardHelper {
 
     private addAIPieces = (): void => {
     
-        // TODO: determine the number of AI pieces to add to the board (e.g. 4 pieces on turn 1, then vary it after that)
+        let roundNumber = store.getState().roundNumber;
 
-        // TODO: find all of the squares in the top row that don't have an AI piece in them
+        // determine the number of AI pieces to add to the board (e.g. 4 pieces on turn 1, then vary it after that)
+        let piecesToSpawn: number = 2;
+        if (roundNumber === 1) {
+            piecesToSpawn = 4;
+        }
 
-        // TODO: add the pieces to the squares
+        // find all of the squares in the top row that don't have an AI piece in them
+        let topRowSquares: string[] = ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8'];
+        let unoccupiedTopRowSquares: string[] = [];
+        for (let i: number = 0; i < topRowSquares.length; i++) {
+            if (!this.chess.get(topRowSquares[i]) || this.chess.get(topRowSquares[i]).color === 'b') {
+                unoccupiedTopRowSquares.push(topRowSquares[i]);
+            }
+        }
 
-        // TODO: tell the state of the pieces that were added for its log
+        // add the pieces to the squares
+        let spawnChance: number = piecesToSpawn / unoccupiedTopRowSquares.length;
+        for (let j: number = 0; j < unoccupiedTopRowSquares.length; j++) {
+            
+            if (Math.random() <= spawnChance) {
+                
+                let newPiece: any = {
+                    type: this.chess.PAWN,
+                    color: this.chess.BLACK
+                };
+                
+                this.chess.put(newPiece, unoccupiedTopRowSquares[j]);
+                
+                // tell the state of the pieces that were added for its log
+                store.dispatch({
+                    type: ADD_AI_PIECES_MOVED,
+                    pieceAdded: newPiece.type
+                });
+            }
+
+        }
 
     }
 

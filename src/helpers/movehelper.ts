@@ -212,9 +212,23 @@ export class MoveHelper {
 
   makeAIMoves = () => {
 
-    console.log('move AI pieces on the board');
+    // check possible moves for each AI piece
+    let columns: string[] = 'a,b,c,d,e,f,g,h'.split(',');
+    for (let i = 0; i < columns.length; i++) {
+      for (let j = 1; j <= 8; j++) {
+        let square: string = columns[i] + j.toString();
+        if (this.game.get(square) && this.game.get(square).color === 'b') {
+          let possibleMoves: any[] = this.game.moves({square: square});
+          // TODO: make a move for each AI piece
+          if (possibleMoves && possibleMoves.length) {
+            this.game.move(possibleMoves[0]);
+            // TODO: set the turn back to the AI, not the player!
+          }
+        }
+      }
+    }
 
-    console.log('add new AI pieces');
+    console.log('move AI pieces on the board');
 
   }
 
