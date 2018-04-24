@@ -213,18 +213,33 @@ export class MoveHelper {
   makeAIMoves = () => {
 
     // check possible moves for each AI piece
-    let columns: string[] = 'a,b,c,d,e,f,g,h'.split(','); // TODO: exclude a, because if any AI pieces end up here then a life (or the game) is lost for the player
+    let columns: string[] = 'a,b,c,d,e,f,g,h'.split(','); 
     for (let i = 0; i < columns.length; i++) {
-      for (let j = 1; j <= 8; j++) {
+      
+      for (let j = 2; j <= 8; j++) { // exclude row 1, because the game may end if AI reaches there
+      
         let square: string = columns[i] + j.toString();
+      
         if (this.game.get(square) && this.game.get(square).color === 'b') {
+      
           let possibleMoves: any[] = this.game.moves({square: square});
-          // TODO: make a move for each AI piece
+          // make a move for each AI piece
           if (possibleMoves && possibleMoves.length) {
+      
+            // TODO: work out the length of each possible move
+
+            // TODO: remove those that are too long for this game (i.e. greater than 4 spaces)
+
+            // TODO: if any remaining move can capture a piece, then use that
+
+            // TODO: otherwise use a random move that sends the piece the most rows up the board
+
             this.game.move(possibleMoves[0]);
-            // TODO: set the turn back to the AI, not the player!
+            this.setNextTurnTaker('b');
+      
           }
         }
+      
       }
     }
 
