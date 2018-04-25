@@ -17,7 +17,14 @@ export interface StoreState {
 export interface MoveDetails {
     source: string;
     target: string;
+    piece: string;
+    targetSquare: string;
     capturesPlayerPiece: string;
     rowDistance: number;
     columnDistance: number;
+}
+
+export interface SpawnChance {
+    piece: string;
+    chance: number;
 }

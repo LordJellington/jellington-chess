@@ -1,7 +1,7 @@
 import store from '../store/store';
 import { MoveHelper } from './movehelper';
 import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED } from '../constants/index';
-import { GamePhase } from '../types/index';
+import { GamePhase, SpawnChance } from '../types/index';
 var ChessBoard = require('chessboardjs');
 var Chess = require('chess.js');
 
@@ -10,6 +10,14 @@ export class BoardHelper {
     private chess: any;
     private board: any;
     private moveHelper: MoveHelper;
+
+    private spawnChances: SpawnChance[] = [
+        {piece: 'q', chance: 0.1},
+        {piece: 'n', chance: 0.3},
+        {piece: 'r', chance: 0.52},
+        {piece: 'b', chance: 0.75},
+        {piece: 'p', chance: 1.0}
+      ];
 
     constructor() {
         this.chess = new Chess();
@@ -122,6 +130,8 @@ export class BoardHelper {
 
         // add the pieces to the squares
         let spawnChance: number = piecesToSpawn / unoccupiedTopRowSquares.length;
+        console.log(this.spawnChances);
+
         for (let j: number = 0; j < unoccupiedTopRowSquares.length; j++) {
             
             if (Math.random() <= spawnChance) {
