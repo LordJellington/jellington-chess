@@ -13,3 +13,11 @@ export interface StoreState {
     aiPiecesAdded: string[];
     roundNumber: number;
 }
+
+export interface MoveDetails {
+    source: string;
+    target: string;
+    capturesPlayerPiece: string;
+    rowDistance: number;
+    columnDistance: number;
+}

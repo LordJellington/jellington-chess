@@ -1,6 +1,6 @@
 import store from '../store/store';
-import { GamePhase } from '../types/index';
-import { ADD_SQUARE_MOVED_TO } from '../constants/index';
+import { GamePhase, MoveDetails } from '../types/index';
+import { ADD_SQUARE_MOVED_TO, COLUMNS } from '../constants/index';
 
 declare var $: any;
 
@@ -210,40 +210,81 @@ export class MoveHelper {
 
   }
 
+  getMoveDetails = (source: string, target: string): MoveDetails => {
+
+    let targetSquare: string = target.charAt(1) === 'x' ? target.substring(2, 4) : target;
+
+    return {
+      source: source,
+      target: target,
+      capturesPlayerPiece: this.game.get(targetSquare),
+      columnDistance: Math.abs(COLUMNS.indexOf(source.charAt(0).toString()) - COLUMNS.indexOf(targetSquare.charAt(0).toString())),
+      rowDistance: ((+source.charAt(1)) - (+targetSquare.charAt(1)))
+    };
+
+  }
+
+  selectMove = (source: string, possibleMoves: string[]): string | null => {
+
+    // get move details
+    let moveList: MoveDetails[] = possibleMoves.map((m: string) => {
+      return this.getMoveDetails(source, m);
+    });
+
+    // remove those that are too long for this game (i.e. greater than 4 spaces)
+    moveList = moveList.filter(m => m.rowDistance <= 4);
+
+    // if any remaining move can capture a piece, then use that
+    let captureMoves: MoveDetails[] = moveList.filter(m => !!m.capturesPlayerPiece);
+    
+    if (captureMoves.length) {
+      return captureMoves[Math.floor(Math.random() * captureMoves.length)].target;
+    }
+
+    // otherwise use a random move that sends the piece the most rows up the board
+    for (let dist: number = 4; dist > 0; dist--) {
+      let distMoves: MoveDetails[] = moveList.filter(m => m.rowDistance === dist);
+      if (distMoves.length) {
+        return distMoves[Math.floor(Math.random() * distMoves.length)].target;
+      }
+    }
+
+    // if we still haven't returned anything then return a random move
+    return moveList.length ? moveList[Math.floor(Math.random() * moveList.length)].target : null;
+
+  }
+
   makeAIMoves = () => {
 
-    // check possible moves for each AI piece
-    let columns: string[] = 'a,b,c,d,e,f,g,h'.split(','); 
-    for (let i = 0; i < columns.length; i++) {
+    // check possible moves for each AI piece    
+    for (let i = 0; i < COLUMNS.length; i++) {
       
-      for (let j = 2; j <= 8; j++) { // exclude row 1, because the game may end if AI reaches there
+      for (let j = 2; j <= 8; j++) { // exclude row 1, because the game will end if AI reaches there
       
-        let square: string = columns[i] + j.toString();
+        let square: string = COLUMNS[i] + j.toString();
+
+        // TODO: !IMPORTANT: I NEED TO STORE THE TARGET OF EACH SQUARE THAT IS MOVED TO AND ENSURE IT IS NOT USED AS A SOURCE FOR LATER MOVES, OTHERWISE AI PIECES CAN MOVE MULTIPLE TIMES
       
         if (this.game.get(square) && this.game.get(square).color === 'b') {
       
-          let possibleMoves: any[] = this.game.moves({square: square});
+          let possibleMoves: string[] = this.game.moves({square: square});
           // make a move for each AI piece
           if (possibleMoves && possibleMoves.length) {
       
-            // TODO: work out the length of each possible move with a map function
+            let selectedMove: string | null = this.selectMove(square, possibleMoves);
 
-            // TODO: remove those that are too long for this game (i.e. greater than 4 spaces)
-
-            // TODO: if any remaining move can capture a piece, then use that
-
-            // TODO: otherwise use a random move that sends the piece the most rows up the board
-
-            this.game.move(possibleMoves[0]);
-            this.setNextTurnTaker('b');
+            if (selectedMove) {
+              this.game.move(selectedMove);
+              this.setNextTurnTaker('b');
+            }
       
           }
         }
       
       }
-    }
 
-    console.log('move AI pieces on the board');
+      // TODO: may need to call setBoardPosition when done
+    }
 
   }
 
