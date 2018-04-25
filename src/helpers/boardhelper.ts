@@ -1,6 +1,6 @@
 import store from '../store/store';
 import { MoveHelper } from './movehelper';
-import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED } from '../constants/index';
+import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED, SET_GAME_WON } from '../constants/index';
 import { GamePhase, SpawnChance } from '../types/index';
 var ChessBoard = require('chessboardjs');
 var Chess = require('chess.js');
@@ -65,14 +65,23 @@ export class BoardHelper {
 
     public submitTurn = (): void => {
         
-        this.setAsAITurn();
-        this.moveHelper.makeAIMoves();
+        if (this.isGameOver()) {
+            store.dispatch({
+                type: SET_PHASE,
+                gamePhase: GamePhase.GAME_OVER
+            });
+        } else {
 
-        // TODO: synchronise this.board and this.chess
+            this.setAsAITurn();
+            this.moveHelper.makeAIMoves();
+    
+            // TODO: synchronise this.board and this.chess
+    
+            this.addAIPieces();
+            this.setAsPlayersTurn();
+            this.incrementTurnNumber();
 
-        this.addAIPieces();
-        this.setAsPlayersTurn();
-        this.incrementTurnNumber();
+        }
 
     }
 
@@ -109,6 +118,37 @@ export class BoardHelper {
         });
     }
 
+    private isGameOver = (): boolean => {
+
+        let roundNumber = store.getState().roundNumber;
+        if (roundNumber >= 20) { // TODO: determine correct number of rounds for winning the game
+            
+            store.dispatch({
+                type: SET_GAME_WON,
+                gameWon: true
+            });
+    
+            return true;
+
+        }
+
+        // if an AI piece reaches the bottom of the board, game over
+        let bottomRowSquares =  ['a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'];
+        if (bottomRowSquares.some(s => this.chess.get(s) && this.chess.get(s).color === 'b')) {
+
+            store.dispatch({
+                type: SET_GAME_WON,
+                gameWon: false
+            });
+    
+            return true;
+
+        }
+
+        return false;
+
+    }
+
     private addAIPieces = (): void => {
     
         let roundNumber = store.getState().roundNumber;
@@ -123,14 +163,14 @@ export class BoardHelper {
         let topRowSquares: string[] = ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8'];
         let unoccupiedTopRowSquares: string[] = [];
         for (let i: number = 0; i < topRowSquares.length; i++) {
-            if (!this.chess.get(topRowSquares[i]) || this.chess.get(topRowSquares[i]).color === 'b') {
+            if (!this.chess.get(topRowSquares[i]) || this.chess.get(topRowSquares[i]).color === 'w') {
                 unoccupiedTopRowSquares.push(topRowSquares[i]);
             }
         }
 
         // add the pieces to the squares
         let spawnChance: number = piecesToSpawn / unoccupiedTopRowSquares.length;
-        console.log(this.spawnChances);
+        console.log(this.spawnChances); // TODO: implement spawnChances
 
         for (let j: number = 0; j < unoccupiedTopRowSquares.length; j++) {
             
@@ -141,6 +181,10 @@ export class BoardHelper {
                     color: this.chess.BLACK
                 };
                 
+                // remove player pieces if an AI piece spawns on top of them
+                if (this.chess.get(unoccupiedTopRowSquares[j])) {
+                    this.chess.remove(unoccupiedTopRowSquares[j]);
+                }
                 this.chess.put(newPiece, unoccupiedTopRowSquares[j]);
                 
                 // tell the state of the pieces that were added for its log

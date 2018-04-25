@@ -12,6 +12,7 @@ export interface StoreState {
     squaresMovedToOnCurrentTurn: string;
     aiPiecesAdded: string[];
     roundNumber: number;
+    gameWon: boolean;
 }
 
 export interface MoveDetails {

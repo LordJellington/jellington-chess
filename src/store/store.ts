@@ -7,7 +7,8 @@ const store = createStore<StoreState>(chessInvasion, {
     gamePhase: GamePhase.TITLE,
     squaresMovedToOnCurrentTurn: '',
     aiPiecesAdded: [],
-    roundNumber: 0
+    roundNumber: 0,
+    gameWon: false
 });
 
 export default store;
