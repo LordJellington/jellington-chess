@@ -8,9 +8,11 @@ export class MoveHelper {
 
   private board: any;
   private game: any;
+  private possiblePlayerMoveDetails: MoveDetails[];
 
   public constructor(game: any) {
     this.game = game;
+    this.possiblePlayerMoveDetails = [];
   }
 
   setBoard = (board: any) => {
@@ -82,25 +84,15 @@ export class MoveHelper {
 
     if (gamePhase === GamePhase.PLAYER_TURN) {
       // see if the move is legal
-      var move = this.game.move({
-        from: source,
-        to: target,
-      });
-
-      // illegal move
-      if (move === null) {
+      if (!this.possiblePlayerMoveDetails.some((m: MoveDetails) => m.source === source && m.targetSquare === target)) {
         return 'snapback';
       }
 
-      this.board.move(source, target);
+      this.board.move(source + '-' + target);
       store.dispatch({
         type: ADD_SQUARE_MOVED_TO,
         squareMovedTo: target
       });
-  
-      this.setNextTurnTaker('w');
-
-      return '';
 
     } else if (gamePhase === GamePhase.PLACEMENT) {
       
@@ -111,12 +103,12 @@ export class MoveHelper {
       } else {
 
         this.board.move(source, target);
-        return '';
 
       }
 
     }
 
+    this.setNextTurnTaker('w', false, this.board.fen());
     return '';
 
   }
@@ -129,13 +121,18 @@ export class MoveHelper {
     this.board.position(newFen, false);
   }
 
-  setNextTurnTaker = (nextTurnTaker: string) => {
+  setNextTurnTaker = (nextTurnTaker: string, animate: boolean, boardFen?: string) => {
     let fenArray: string[] = this.game.fen().split(' ');
+    if (boardFen) {
+      fenArray[0] = boardFen;
+    }
     fenArray[1] = nextTurnTaker; // keep it as white's move
     fenArray[3] = '-'; // no en passant
+    fenArray[4] = '0';
+    fenArray[5] = '1';
     let newFen: string = fenArray.join(' ');
     this.game.load(newFen);
-    this.board.position(newFen, false);
+    this.board.position(newFen, animate);
   }
 
   onMouseoverSquare = (square: any, piece: any) => {
@@ -148,8 +145,13 @@ export class MoveHelper {
       let moves = this.invalidMove(square, piece) ? [] : 
         this.game.moves({
           square: square,
-          verbose: true
+          verbose: true,
+          legal: false
         });
+
+      this.possiblePlayerMoveDetails = moves.map((m: any) => {
+        return this.getMoveDetails(square, m);
+      });
 
       // exit if there are no moves available for this square
       if (moves.length === 0) {
@@ -188,22 +190,6 @@ export class MoveHelper {
     this.removeGreySquares();
   }
 
-  onSnapEnd = () => {
-    
-    let { gamePhase } = store.getState();
-    
-    if (gamePhase === GamePhase.PLACEMENT) {
-
-      this.setBoardPosition(this.board.fen());
-    
-    } else if (gamePhase === GamePhase.PLAYER_TURN) {
-    
-      this.board.position(this.game.fen());
-    
-    }
-
-  }
-
   onChange = (oldPosition: any, newPosition: any) => {
 
     console.log('onChange', oldPosition, newPosition);
@@ -213,22 +199,6 @@ export class MoveHelper {
   getMoveDetails = (source: string, target: any): MoveDetails => {
 
     let targetSquare: string = target.to;
-    
-    // if (target.startsWith('B')) {
-    //   // TODO: bishop
-    //   targetSquare = target.charAt(1) === 'x' ? target.substring(2, 4) : target.substring(1, 3);
-    // } else if (target.startsWith('N')) {
-    //   // TODO: knight
-    //   targetSquare = target.charAt(1) === 'x' ? target.substring(2, 4) : target.substring(1, 3);
-    // } else if (target.startsWith('R')) {
-    //   // TODO: rook
-    //   targetSquare = target.charAt(1) === 'x' ? target.substring(2, 4) : target.substring(1, 3);
-    // } else if (target.startsWith('Q')) {
-    //   // TODO: queen
-    //   targetSquare = target.charAt(1) === 'x' ? target.substring(2, 4) : target.substring(1, 3);
-    // } else {
-    //   targetSquare = target.charAt(1) === 'x' ? target.substring(2, 4) : target;
-    // }
     
     return {
       source: source,
@@ -245,7 +215,7 @@ export class MoveHelper {
   selectMove = (source: string, possibleMoves: any[]): MoveDetails | null => {
 
     // get move details
-    let moveList: MoveDetails[] = possibleMoves.map((m: string) => {
+    let moveList: MoveDetails[] = possibleMoves.map((m: any) => {
       return this.getMoveDetails(source, m);
     });
 
@@ -298,7 +268,7 @@ export class MoveHelper {
 
         if (this.game.get(square) && this.game.get(square).color === 'b' && invalidTargetSquares.indexOf(square) < 0) {
       
-          let possibleMoves: any[] = this.game.moves({square: square, verbose: true});
+          let possibleMoves: any[] = this.game.moves({square: square, verbose: true, legal: false});
           // make a move for each AI piece
           if (possibleMoves && possibleMoves.length) {
       
@@ -307,7 +277,7 @@ export class MoveHelper {
             if (selectedMove) {
               invalidTargetSquares.push(selectedMove.targetSquare);
               this.game.move(selectedMove.san);
-              this.setNextTurnTaker('b');
+              this.setNextTurnTaker('b', true);
             }
       
           }

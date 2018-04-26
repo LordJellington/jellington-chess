@@ -27,7 +27,12 @@ export class BoardHelper {
 
     public start = (): void => {
         this.chess = new Chess();
-
+        this.chess.game_over = function () { return false; };
+        this.chess.in_check = function () { return false; };
+        this.chess.in_checkmate = function () { return false; };
+        this.chess.in_draw = function () { return false; };
+        this.chess.in_checkmate = function () { return false; };
+        this.chess.in_threefold_repetition = function () { return false; };
         this.moveHelper = new MoveHelper(this.chess);
         this.board = ChessBoard('board', {
             draggable: true,
@@ -36,7 +41,6 @@ export class BoardHelper {
             onDrop: this.moveHelper.onDrop,
             onMouseoutSquare: this.moveHelper.onMouseoutSquare,
             onMouseoverSquare: this.moveHelper.onMouseoverSquare,
-            onSnapEnd: this.moveHelper.onSnapEnd,
             onChange: this.moveHelper.onChange
         });
         this.moveHelper.setBoard(this.board);
@@ -86,23 +90,11 @@ export class BoardHelper {
 
         }
 
-        // TODO: I need to basically restart the game here using the board position, otherwise the move history breaks everything
-        // Look at https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation, and reset large parts of the fen string. Create a method for this
-        // that does something like:
-        // let fen: string = this.board.position
-        // this.chess.reset();
-        // this.chess.load(this.board.position);
-        // then reset:
-        // castling availability
-        // enpassant target square
-        // halfmove clock
-        // fullmove number
-
     }
 
     public submitPlacement = (): void => {
 
-        this.setAsAITurn();
+        this.setAsAITurn(this.board.fen());
         this.addAIPieces();
         this.setAsPlayersTurn();
         this.incrementTurnNumber();
@@ -206,7 +198,7 @@ export class BoardHelper {
     private setAsPlayersTurn = (): void => {
 
         // move back to players turn
-        this.moveHelper.setNextTurnTaker('w');
+        this.moveHelper.setNextTurnTaker('w', false);
         store.dispatch({
             type: SET_PHASE,
             gamePhase: GamePhase.PLAYER_TURN
@@ -221,9 +213,9 @@ export class BoardHelper {
 
     }
 
-    private setAsAITurn = (): void => {
+    private setAsAITurn = (boardFen?: string): void => {
      
-        this.moveHelper.setNextTurnTaker('b');
+        this.moveHelper.setNextTurnTaker('b', false, boardFen);
         store.dispatch({
             type: SET_PHASE,
             gamePhase: GamePhase.AI_TURN
