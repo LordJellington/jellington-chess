@@ -1,5 +1,5 @@
 import { StoreState, GamePhase } from '../types/index';
-import { SET_BOARD_STATE_AT_TURN_START, SET_PHASE, ADD_SQUARE_MOVED_TO, RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_GAME_WON } from '../constants/index';
+import { SET_BOARD_STATE_AT_TURN_START, SET_PHASE, ADD_SQUARE_MOVED_TO, RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_GAME_WON, INCREMENT_TURN_NUMBER } from '../constants/index';
 import { CommonHelper } from '../helpers/commonhelper';
 
 let setPhase = (state: StoreState, gamePhase: GamePhase): StoreState => {
@@ -29,6 +29,11 @@ let setGameWon = (state: StoreState, gameWon: boolean): StoreState => {
     return state;
 };
 
+let incrementTurnNumber = (state: StoreState): StoreState => {
+    state.roundNumber++;
+    return state;
+};
+
 export function chessInvasion(state: StoreState, action: any): StoreState {
 
     let cloneState = CommonHelper.clone(state);
@@ -48,6 +53,9 @@ export function chessInvasion(state: StoreState, action: any): StoreState {
             break;
         case SET_GAME_WON: 
             cloneState = setGameWon(cloneState, action.gameWon);
+            break;
+        case INCREMENT_TURN_NUMBER:
+            cloneState = incrementTurnNumber(cloneState);
             break;
         default:
             break; 

@@ -1,6 +1,7 @@
 import store from '../store/store';
 import { MoveHelper } from './movehelper';
-import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED, SET_GAME_WON } from '../constants/index';
+import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED, SET_GAME_WON, ROUNDS_TO_WIN } 
+    from '../constants/index';
 import { GamePhase, SpawnChance } from '../types/index';
 var ChessBoard = require('chessboardjs');
 var Chess = require('chess.js');
@@ -11,6 +12,7 @@ export class BoardHelper {
     private board: any;
     private moveHelper: MoveHelper;
 
+    private squareSpawnChance = 0.3;
     private spawnChances: SpawnChance[] = [
         {piece: 'q', chance: 0.1},
         {piece: 'n', chance: 0.3},
@@ -75,13 +77,26 @@ export class BoardHelper {
             this.setAsAITurn();
             this.moveHelper.makeAIMoves();
     
-            // TODO: synchronise this.board and this.chess
+            // synchronise this.board and this.chess
+            this.board.position(this.chess.fen());
     
             this.addAIPieces();
             this.setAsPlayersTurn();
             this.incrementTurnNumber();
 
         }
+
+        // TODO: I need to basically restart the game here using the board position, otherwise the move history breaks everything
+        // Look at https://en.wikipedia.org/wiki/Forsyth%E2%80%93Edwards_Notation, and reset large parts of the fen string. Create a method for this
+        // that does something like:
+        // let fen: string = this.board.position
+        // this.chess.reset();
+        // this.chess.load(this.board.position);
+        // then reset:
+        // castling availability
+        // enpassant target square
+        // halfmove clock
+        // fullmove number
 
     }
 
@@ -101,17 +116,6 @@ export class BoardHelper {
         console.log(this.chess.pgn());
     }
 
-    public setPosition = (): void => {
-        this.board.position(
-            {
-            d6: 'bK',
-            d4: 'wP',
-            e4: 'wK'
-            }, 
-            true
-        );
-    }
-
     private incrementTurnNumber = (): void => {
         store.dispatch({
             type: INCREMENT_TURN_NUMBER
@@ -121,7 +125,7 @@ export class BoardHelper {
     private isGameOver = (): boolean => {
 
         let roundNumber = store.getState().roundNumber;
-        if (roundNumber >= 20) { // TODO: determine correct number of rounds for winning the game
+        if (roundNumber >= ROUNDS_TO_WIN) { // TODO: determine correct number of rounds for winning the game
             
             store.dispatch({
                 type: SET_GAME_WON,
@@ -151,13 +155,7 @@ export class BoardHelper {
 
     private addAIPieces = (): void => {
     
-        let roundNumber = store.getState().roundNumber;
-
-        // determine the number of AI pieces to add to the board (e.g. 4 pieces on turn 1, then vary it after that)
-        let piecesToSpawn: number = 2;
-        if (roundNumber === 1) {
-            piecesToSpawn = 4;
-        }
+        // let roundNumber = store.getState().roundNumber;
 
         // find all of the squares in the top row that don't have an AI piece in them
         let topRowSquares: string[] = ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8'];
@@ -169,30 +167,37 @@ export class BoardHelper {
         }
 
         // add the pieces to the squares
-        let spawnChance: number = piecesToSpawn / unoccupiedTopRowSquares.length;
-        console.log(this.spawnChances); // TODO: implement spawnChances
-
         for (let j: number = 0; j < unoccupiedTopRowSquares.length; j++) {
+
+            let chanceOfSpawningOnSquare = Math.random();
             
-            if (Math.random() <= spawnChance) {
+            for (let k: number = 0; k < this.spawnChances.length; k++) {
+                let spawnChance: number = this.spawnChances[k].chance;
+                let piece: string = this.spawnChances[k].piece;
+
+                if (chanceOfSpawningOnSquare <= (spawnChance * this.squareSpawnChance)) {
                 
-                let newPiece: any = {
-                    type: this.chess.PAWN,
-                    color: this.chess.BLACK
-                };
-                
-                // remove player pieces if an AI piece spawns on top of them
-                if (this.chess.get(unoccupiedTopRowSquares[j])) {
-                    this.chess.remove(unoccupiedTopRowSquares[j]);
+                    let newPiece: any = {
+                        type: piece,
+                        color: this.chess.BLACK
+                    };
+                    
+                    // remove player pieces if an AI piece spawns on top of them
+                    if (this.chess.get(unoccupiedTopRowSquares[j])) {
+                        this.chess.remove(unoccupiedTopRowSquares[j]);
+                    }
+                    this.chess.put(newPiece, unoccupiedTopRowSquares[j]);
+                    
+                    // tell the state of the pieces that were added for its log
+                    store.dispatch({
+                        type: ADD_AI_PIECES_MOVED,
+                        pieceAdded: newPiece.type
+                    });
+
+                    break;
                 }
-                this.chess.put(newPiece, unoccupiedTopRowSquares[j]);
-                
-                // tell the state of the pieces that were added for its log
-                store.dispatch({
-                    type: ADD_AI_PIECES_MOVED,
-                    pieceAdded: newPiece.type
-                });
-            }
+
+            }         
 
         }
 

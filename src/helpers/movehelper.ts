@@ -210,14 +210,30 @@ export class MoveHelper {
 
   }
 
-  getMoveDetails = (source: string, target: string): MoveDetails => {
+  getMoveDetails = (source: string, target: any): MoveDetails => {
 
-    let targetSquare: string = target.charAt(1) === 'x' ? target.substring(2, 4) : target;
-
+    let targetSquare: string = target.to;
+    
+    // if (target.startsWith('B')) {
+    //   // TODO: bishop
+    //   targetSquare = target.charAt(1) === 'x' ? target.substring(2, 4) : target.substring(1, 3);
+    // } else if (target.startsWith('N')) {
+    //   // TODO: knight
+    //   targetSquare = target.charAt(1) === 'x' ? target.substring(2, 4) : target.substring(1, 3);
+    // } else if (target.startsWith('R')) {
+    //   // TODO: rook
+    //   targetSquare = target.charAt(1) === 'x' ? target.substring(2, 4) : target.substring(1, 3);
+    // } else if (target.startsWith('Q')) {
+    //   // TODO: queen
+    //   targetSquare = target.charAt(1) === 'x' ? target.substring(2, 4) : target.substring(1, 3);
+    // } else {
+    //   targetSquare = target.charAt(1) === 'x' ? target.substring(2, 4) : target;
+    // }
+    
     return {
       source: source,
       piece: this.game.get(source).type,
-      target: target,
+      san: target.san,
       targetSquare: targetSquare,
       capturesPlayerPiece: this.game.get(targetSquare),
       columnDistance: Math.abs(COLUMNS.indexOf(source.charAt(0).toString()) - COLUMNS.indexOf(targetSquare.charAt(0).toString())),
@@ -226,7 +242,7 @@ export class MoveHelper {
 
   }
 
-  selectMove = (source: string, possibleMoves: string[]): MoveDetails | null => {
+  selectMove = (source: string, possibleMoves: any[]): MoveDetails | null => {
 
     // get move details
     let moveList: MoveDetails[] = possibleMoves.map((m: string) => {
@@ -282,7 +298,7 @@ export class MoveHelper {
 
         if (this.game.get(square) && this.game.get(square).color === 'b' && invalidTargetSquares.indexOf(square) < 0) {
       
-          let possibleMoves: string[] = this.game.moves({square: square});
+          let possibleMoves: any[] = this.game.moves({square: square, verbose: true});
           // make a move for each AI piece
           if (possibleMoves && possibleMoves.length) {
       
@@ -290,7 +306,7 @@ export class MoveHelper {
 
             if (selectedMove) {
               invalidTargetSquares.push(selectedMove.targetSquare);
-              this.game.move(selectedMove.target);
+              this.game.move(selectedMove.san);
               this.setNextTurnTaker('b');
             }
       
@@ -299,7 +315,6 @@ export class MoveHelper {
       
       }
 
-      // TODO: may need to call setBoardPosition when done
     }
 
   }

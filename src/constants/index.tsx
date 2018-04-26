@@ -13,3 +13,5 @@ export const INCREMENT_TURN_NUMBER: string = 'INCREMENT_TURN_NUMBER';
 export const SET_GAME_WON: string = 'SET_GAME_WON';
 
 export const COLUMNS: string[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+export const ROUNDS_TO_WIN: number = 20;

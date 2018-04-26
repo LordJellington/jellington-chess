@@ -17,7 +17,7 @@ export interface StoreState {
 
 export interface MoveDetails {
     source: string;
-    target: string;
+    san: string;
     piece: string;
     targetSquare: string;
     capturesPlayerPiece: string;
