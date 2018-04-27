@@ -3,6 +3,7 @@ import { MoveHelper } from './movehelper';
 import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED, SET_GAME_WON, ROUNDS_TO_WIN } 
     from '../constants/index';
 import { GamePhase, SpawnChance } from '../types/index';
+import { CommonHelper } from './commonhelper';
 var ChessBoard = require('chessboardjs');
 var Chess = require('chess.js');
 
@@ -12,12 +13,11 @@ export class BoardHelper {
     private board: any;
     private moveHelper: MoveHelper;
 
-    private squareSpawnChance = 0.3;
     private spawnChances: SpawnChance[] = [
-        {piece: 'q', chance: 0.1},
-        {piece: 'n', chance: 0.3},
-        {piece: 'r', chance: 0.52},
-        {piece: 'b', chance: 0.75},
+        {piece: 'q', chance: 0.05},
+        {piece: 'n', chance: 0.2},
+        {piece: 'r', chance: 0.35},
+        {piece: 'b', chance: 0.5},
         {piece: 'p', chance: 1.0}
       ];
 
@@ -26,6 +26,9 @@ export class BoardHelper {
     }
 
     public start = (): void => {
+
+        let swapPieceColour: boolean = Math.random() < 0.5;
+
         this.chess = new Chess();
         this.chess.game_over = function () { return false; };
         this.chess.in_check = function () { return false; };
@@ -36,12 +39,16 @@ export class BoardHelper {
         this.moveHelper = new MoveHelper(this.chess);
         this.board = ChessBoard('board', {
             draggable: true,
-            pieceTheme: 'assets/pieces/{piece}.png',
+            pieceTheme: (piece: string) => {
+                if (swapPieceColour) {
+                    piece = (piece.charAt(0) === 'w' ? piece.replace('w', 'b') : piece.replace('b', 'w'));
+                }
+                return 'assets/pieces/' + piece + '.png';
+            },
             onDragStart: this.moveHelper.onDragStart,
             onDrop: this.moveHelper.onDrop,
             onMouseoutSquare: this.moveHelper.onMouseoutSquare,
-            onMouseoverSquare: this.moveHelper.onMouseoverSquare,
-            onChange: this.moveHelper.onChange
+            onMouseoverSquare: this.moveHelper.onMouseoverSquare
         });
         this.moveHelper.setBoard(this.board);
         this.board.start();
@@ -84,7 +91,10 @@ export class BoardHelper {
             // synchronise this.board and this.chess
             this.board.position(this.chess.fen());
     
-            this.addAIPieces();
+            while (CommonHelper.getPiecesOnBoard('b', this.chess) < 2) {
+                this.addAIPieces();
+            }
+
             this.setAsPlayersTurn();
             this.incrementTurnNumber();
 
@@ -97,7 +107,6 @@ export class BoardHelper {
         this.setAsAITurn(this.board.fen());
         this.addAIPieces();
         this.setAsPlayersTurn();
-        this.incrementTurnNumber();
 
     }
 
@@ -117,7 +126,7 @@ export class BoardHelper {
     private isGameOver = (): boolean => {
 
         let roundNumber = store.getState().roundNumber;
-        if (roundNumber >= ROUNDS_TO_WIN) { // TODO: determine correct number of rounds for winning the game
+        if ((roundNumber + 1) >= ROUNDS_TO_WIN) { 
             
             store.dispatch({
                 type: SET_GAME_WON,
@@ -147,7 +156,13 @@ export class BoardHelper {
 
     private addAIPieces = (): void => {
     
-        // let roundNumber = store.getState().roundNumber;
+        let roundNumber: number = store.getState().roundNumber;
+        let squareSpawnChance: number = 0.2;
+        let numberOfPiecesSpawned: number = 0;
+
+        if (roundNumber >= 10) {
+            squareSpawnChance = 0.3;
+        }        
 
         // find all of the squares in the top row that don't have an AI piece in them
         let topRowSquares: string[] = ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8'];
@@ -164,10 +179,14 @@ export class BoardHelper {
             let chanceOfSpawningOnSquare = Math.random();
             
             for (let k: number = 0; k < this.spawnChances.length; k++) {
-                let spawnChance: number = this.spawnChances[k].chance;
+                let spawnChance: number = this.spawnChances[k].chance * squareSpawnChance;
                 let piece: string = this.spawnChances[k].piece;
 
-                if (chanceOfSpawningOnSquare <= (spawnChance * this.squareSpawnChance)) {
+                if (this.chess.get(unoccupiedTopRowSquares[j]) && this.chess.get(unoccupiedTopRowSquares[j]).color === 'w') {
+                    spawnChance *= 2;
+                }
+
+                if (chanceOfSpawningOnSquare <= spawnChance) {
                 
                     let newPiece: any = {
                         type: piece,
@@ -186,11 +205,17 @@ export class BoardHelper {
                         pieceAdded: newPiece.type
                     });
 
+                    numberOfPiecesSpawned++;
+
                     break;
                 }
 
             }         
 
+        }
+
+        if (roundNumber === 0 && numberOfPiecesSpawned === 0) {
+            this.addAIPieces();
         }
 
     }

@@ -19,8 +19,6 @@ export class MoveHelper {
     this.board = board;
   }
 
-  // see http://chessboardjs.com/examples#5003
-
   removeGreySquares = () => {
     $('#board .square-55d63').css('background', '');
   }
@@ -42,6 +40,10 @@ export class MoveHelper {
     
     if (gamePhase === GamePhase.PLAYER_TURN) {
 
+      // a piece cannot move if:
+      // the game is over
+      // it's not the player's turn
+      // that piece has moved before on the current turn
       return !piece || 
       (gamePhase !== GamePhase.PLAYER_TURN && gamePhase !== GamePhase.PLACEMENT) ||
       this.game.game_over() === true ||
@@ -57,11 +59,6 @@ export class MoveHelper {
     }
 
     return true;
-
-    // a piece cannot move if:
-    // the game is over
-    // it's not the player's turn
-    // that piece has moved before on the current turn
 
   }
 
@@ -190,12 +187,6 @@ export class MoveHelper {
     this.removeGreySquares();
   }
 
-  onChange = (oldPosition: any, newPosition: any) => {
-
-    console.log('onChange', oldPosition, newPosition);
-
-  }
-
   getMoveDetails = (source: string, target: any): MoveDetails => {
 
     let targetSquare: string = target.to;
@@ -276,8 +267,8 @@ export class MoveHelper {
 
             if (selectedMove) {
               invalidTargetSquares.push(selectedMove.targetSquare);
-              this.game.move(selectedMove.san);
-              this.setNextTurnTaker('b', true);
+              this.board.move(selectedMove.source + '-' + selectedMove.targetSquare);
+              this.setNextTurnTaker('b', true, this.board.fen());
             }
       
           }

@@ -18,13 +18,14 @@ class Title extends React.Component<Props, object> {
         return (
             <div className="container">
                 <h1>{title}</h1>
+                <p>by Lord Jellington (with an awful lot of help from chess.js and chessboardjs)</p>
                 <button 
                     id="startButton"
                     className="btn btn-primary"
                     onClick={onStartClick}
                 >
                     Start
-                </button>
+                </button>             
 
                 <div className="instructions-wrapper">
                     <button 
@@ -35,14 +36,22 @@ class Title extends React.Component<Props, object> {
                         Instructions
                     </button>
                     <div className="instructions">
-                        {// TODO: fill out instructions
-                         // explain how enemy pieces will spawn on the top row and you leave your pieces there at your own risk
-                         // explain how the enemy pieces move (i.e. no more than 4 spaces in one move), pawns can only move one square at a time    
-                         // if an enemy piece begins its turn at the bottom row of the board, then you lost the game or lose a life 
-                        }
-                        Lorem ipsum dolor sit amet, consectetur adipisicing elit,
-                        sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-                        quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                        <p>Still a very early work in progress, but here are a few rules for now</p>
+                        <ul>
+                            <li>You get 4 pieces: a queen, a bishop, a knight, and a rook</li>
+                            <li>You can place them anywhere in the bottom two rows before you start</li>
+                            <li>Once you start, enemy pieces will spawn at random on the top row</li>
+                            <li>If an enemy piece spawns over the top of one of your pieces then your piece is captured</li>
+                            <li>Leaving one on your pieces on the top row will double the chance of an enemy piece spawning there</li>
+                            <li>The enemy pieces can move a maximum of 4 squares in one turn</li>
+                            <li>An enemy piece will always capture one of your pieces if it can (without breaking the 4 square movement rule)</li>
+                            <li>Enemy knights move like regular knights</li>
+                            <li>Enemy pawns move like regular pawns</li>
+                            <li>Your pieces move like regular pieces</li>
+                            <li>If an enemy piece reaches the bottom row and survives there for one turn it is game over for you</li>
+                            <li>If you survive 20 turns without that happening then you win</li>
+                            <li>Please send constructive feedback to james.ellins@gmail.com</li>
+                        </ul>
                     </div>
                 </div>
             </div>
