@@ -32,7 +32,7 @@ class BoardContainer extends React.Component<any, any> {
 
         return (
         <div>
-            <span className="label label-default">{roundsRemainingMessage}</span>
+            <span className="label label-default rounds-remaining">{roundsRemainingMessage}</span>
             <Board
                 helper={this.boardHelper}
                 gamePhase={gamePhase}

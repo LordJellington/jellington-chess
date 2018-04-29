@@ -1,6 +1,6 @@
 #board { 
-    width: 400px;
-    height: 400px;
+    max-width: 600px;
+    max-height: 600px;
 }
 
 .instructions-wrapper {
@@ -10,4 +10,23 @@
 .instructions-wrapper .instructions {
     display: none;
     text-align: left;
+}
+
+.board-buttons-wrapper {
+    margin-top: 5px;
+}
+
+.board-buttons-wrapper .btn {
+    margin: 5px;
+    margin-top: 0px;
+}
+
+.label.rounds-remaining {
+    display: inline-block;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.App {
+    margin-top: 5px;
 }

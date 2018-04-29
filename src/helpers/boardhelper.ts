@@ -1,11 +1,12 @@
 import store from '../store/store';
 import { MoveHelper } from './movehelper';
-import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED, SET_GAME_WON, ROUNDS_TO_WIN } 
+import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED, SET_GAME_WON, ROUNDS_TO_WIN, COLUMNS } 
     from '../constants/index';
 import { GamePhase, SpawnChance } from '../types/index';
 import { CommonHelper } from './commonhelper';
 var ChessBoard = require('chessboardjs');
 var Chess = require('chess.js');
+declare var $: any;
 
 export class BoardHelper {
 
@@ -48,10 +49,29 @@ export class BoardHelper {
             onDragStart: this.moveHelper.onDragStart,
             onDrop: this.moveHelper.onDrop,
             onMouseoutSquare: this.moveHelper.onMouseoutSquare,
-            onMouseoverSquare: this.moveHelper.onMouseoverSquare
+            onMouseoverSquare: this.moveHelper.onMouseoverSquare,
+            showNotation: false
         });
         this.moveHelper.setBoard(this.board);
         this.board.start();
+
+        // apply touchstart event to all squares
+        let allSquares: string[] = [];
+        for (let i = 0; i < COLUMNS.length; i++) {
+            for (let j = 1; j <= 8; j++) {
+                allSquares.push('.square-' + COLUMNS[i] + j.toString());
+            }
+        }
+        $(allSquares.join(',')).on('touchstart click', (e: any) => {
+            let piece: any = e.target.attributes['data-piece'];
+            if (piece) {
+                let square: any = e.target.parentElement.attributes['data-square'];
+                if (square) {
+                    this.moveHelper.onMouseoverSquare(square.nodeValue, piece.nodeValue);
+                }
+                
+            }
+        });
 
         this.chess.load('8/8/8/8/8/8/8/8 w - - 0 1'); // empty board
         this.board.position(this.chess.fen());

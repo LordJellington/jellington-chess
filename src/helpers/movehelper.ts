@@ -54,7 +54,7 @@ export class MoveHelper {
     } else if (gamePhase === GamePhase.PLACEMENT) {
 
       return +target.charAt(1) > 2 || // target is not in first two rows
-        !!this.game.get(target); // there is a piece occupying the target square
+        !!this.board.position()[target]; // there is a piece occupying the target square
 
     }
 
@@ -63,6 +63,9 @@ export class MoveHelper {
   }
 
   onDragStart = (source: any, piece: any) => {
+
+    // TODO: remove below if it won't work
+    // this.onMouseoverSquare(source, piece); // TODO: this may work for touch devices
 
     let { gamePhase } = store.getState();
 
@@ -99,7 +102,7 @@ export class MoveHelper {
 
       } else {
 
-        this.board.move(source, target);
+        this.board.move(source + '-' + target);
 
       }
 
@@ -166,7 +169,7 @@ export class MoveHelper {
     } else if (gamePhase === GamePhase.PLACEMENT) {
 
       // exit if mouseovered square is not occupied
-      if (!this.game.get(square)) {
+      if (!this.board.position()[square]) {
         return;
       }
       
@@ -174,7 +177,7 @@ export class MoveHelper {
       for (let j: number = 0; j < rows.length; j++) {
         for (let k: number = 1; k <= 2; k++) {
           let target: string = rows[j] + k.toString();
-          if (!this.game.get(target)) {
+          if (!this.board.position()[target]) {
             this.greySquare(target);
           }
         }
