@@ -64,9 +64,6 @@ export class MoveHelper {
 
   onDragStart = (source: any, piece: any) => {
 
-    // TODO: remove below if it won't work
-    // this.onMouseoverSquare(source, piece); // TODO: this may work for touch devices
-
     let { gamePhase } = store.getState();
 
     if (gamePhase === GamePhase.PLAYER_TURN && this.invalidMove(source, piece)) {
