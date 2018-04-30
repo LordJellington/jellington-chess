@@ -62,6 +62,8 @@ export class BoardHelper {
                 allSquares.push('.square-' + COLUMNS[i] + j.toString());
             }
         }
+
+        // TODO: look at if both touchstart and click are needed here. Perhaps just touchstart is
         $(allSquares.join(',')).on('touchstart click', (e: any) => {
             let piece: any = e.target.attributes['data-piece'];
             if (piece) {
