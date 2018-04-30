@@ -67,16 +67,17 @@ export class BoardHelper {
             }
         }
 
-        // TODO: look at if both touchstart and click are needed here. Perhaps just touchstart is
-        $(allSquares.join(',')).on('touchstart click', (e: any) => {
+        // look at if both touchstart and click are needed here. Perhaps just touchstart is
+        $(allSquares.join(',')).on('touchstart', (e: any) => {
+            e.preventDefault();
             let piece: any = e.target.attributes['data-piece'];
             if (piece) {
                 let square: any = e.target.parentElement.attributes['data-square'];
                 if (square) {
                     this.moveHelper.onMouseoverSquare(square.nodeValue, piece.nodeValue);
                 }
-                
             }
+            return true;
         });
 
         this.chess.load('8/8/8/8/8/8/8/8 w - - 0 1'); // empty board

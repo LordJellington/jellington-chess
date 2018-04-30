@@ -7,8 +7,6 @@ export interface Props {
     onStartClick: () => void;
 }
 
-declare var $: any;
-
 class Title extends React.Component<Props, object> {
 
     render() {
@@ -28,13 +26,7 @@ class Title extends React.Component<Props, object> {
                 </button>             
 
                 <div className="instructions-wrapper">
-                    <button 
-                        type="button" 
-                        className="btn btn-info"
-                        onClick={() => { $('.instructions').toggle(); }}
-                    >
-                        Instructions
-                    </button>
+                    <h3>Instructions</h3>
                     <div className="instructions">
                         <p>Still a very early work in progress, but here are a few rules for now</p>
                         <ul>
@@ -42,7 +34,7 @@ class Title extends React.Component<Props, object> {
                             <li>You can place them anywhere in the bottom two rows before you start</li>
                             <li>Once you start, enemy pieces will spawn at random on the top row</li>
                             <li>If an enemy piece spawns over the top of one of your pieces then your piece is captured</li>
-                            <li>Leaving one on your pieces on the top row will double the chance of an enemy piece spawning there</li>
+                            <li>Leaving one on your pieces on the top row will increase the chance of an enemy piece spawning there</li>
                             <li>The enemy pieces can move a maximum of 4 squares in one turn</li>
                             <li>An enemy piece will always capture one of your pieces if it can (without breaking the 4 square movement rule)</li>
                             <li>Enemy knights move like regular knights</li>
