@@ -22,4 +22,9 @@ export class CommonHelper {
         return pieces;
     }
 
+    public static getRandomElement = (array: any[]): any => {
+        let index: number = Math.round((array.length - 1) * Math.random());
+        return array[index];
+    }
+
 }

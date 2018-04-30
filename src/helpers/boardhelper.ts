@@ -2,7 +2,7 @@ import store from '../store/store';
 import { MoveHelper } from './movehelper';
 import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED, SET_GAME_WON, ROUNDS_TO_WIN, COLUMNS } 
     from '../constants/index';
-import { GamePhase, SpawnChance } from '../types/index';
+import { GamePhase, PieceDetail } from '../types/index';
 import { CommonHelper } from './commonhelper';
 var ChessBoard = require('chessboardjs');
 var Chess = require('chess.js');
@@ -14,12 +14,12 @@ export class BoardHelper {
     private board: any;
     private moveHelper: MoveHelper;
 
-    private spawnChances: SpawnChance[] = [
-        {piece: 'q', chance: 0.05},
-        {piece: 'n', chance: 0.2},
-        {piece: 'r', chance: 0.35},
-        {piece: 'b', chance: 0.5},
-        {piece: 'p', chance: 1.0}
+    private pieceDetails: PieceDetail[] = [
+        {piece: 'q', rating: 5, chance: 0.05},
+        {piece: 'n', rating: 4, chance: 0.2},
+        {piece: 'b', rating: 3, chance: 0.5},
+        {piece: 'r', rating: 2, chance: 0.35},
+        {piece: 'p', rating: 1, chance: 1.0}
       ];
 
     constructor() {
@@ -111,9 +111,7 @@ export class BoardHelper {
             // synchronise this.board and this.chess
             this.board.position(this.chess.fen());
     
-            while (CommonHelper.getPiecesOnBoard('b', this.chess) < 2) {
-                this.addAIPieces();
-            }
+            this.addAIPieces();
 
             this.setAsPlayersTurn();
             this.incrementTurnNumber();
@@ -125,7 +123,7 @@ export class BoardHelper {
     public submitPlacement = (): void => {
 
         this.setAsAITurn(this.board.fen());
-        this.addAIPieces();
+        this.addAIPieces(true);
         this.setAsPlayersTurn();
 
     }
@@ -174,15 +172,16 @@ export class BoardHelper {
 
     }
 
-    private addAIPieces = (): void => {
-    
+    private addAIPieces = (addPiecesAnyway?: boolean): void => {
         let roundNumber: number = store.getState().roundNumber;
-        let squareSpawnChance: number = 0.2;
-        let numberOfPiecesSpawned: number = 0;
+ 
+        // only add AI pieces every 2 turns
+        if (roundNumber % 2 === 0 && !addPiecesAnyway) {
+            return;
+        }
 
-        if (roundNumber >= 10) {
-            squareSpawnChance = 0.3;
-        }        
+        let pieceValueLowerThreshold: number = 0;
+        let pieceValueUpperThreshold: number = 2 + Math.floor((roundNumber - 1) * 0.5);
 
         // find all of the squares in the top row that don't have an AI piece in them
         let topRowSquares: string[] = ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8'];
@@ -193,50 +192,61 @@ export class BoardHelper {
             }
         }
 
-        // add the pieces to the squares
-        for (let j: number = 0; j < unoccupiedTopRowSquares.length; j++) {
+        let loopCounter: number = 0; 
+        let piecesToSpawn: PieceDetail[] = this.getPiecesToSpawn();
+        let totalRating: number = piecesToSpawn.map(p => p.rating).reduce((acc, v) => acc + v);
+        while (!(totalRating > pieceValueLowerThreshold && totalRating < pieceValueUpperThreshold) && loopCounter < 1000) {
+            piecesToSpawn = this.getPiecesToSpawn();
+            totalRating = piecesToSpawn.map(p => p.rating).reduce((acc, v) => acc + v);
+            loopCounter++;
+        } 
+        
+        if (loopCounter === 10000) {
+            console.log('failed to generate piecesToSpawn array', pieceValueLowerThreshold, pieceValueUpperThreshold); // TODO: remove when no longer needed
+            return;
+        }
+         
+        // if there are more pieces than squares
+        if (piecesToSpawn.length > unoccupiedTopRowSquares.length) {
+            piecesToSpawn = piecesToSpawn.splice(0, unoccupiedTopRowSquares.length);
+        }
 
-            let chanceOfSpawningOnSquare = Math.random();
+        // spawn the pieces
+        for (let j: number = 0; j < piecesToSpawn.length; j++) {
             
-            for (let k: number = 0; k < this.spawnChances.length; k++) {
-                let spawnChance: number = this.spawnChances[k].chance * squareSpawnChance;
-                let piece: string = this.spawnChances[k].piece;
+            let newPiece: any = {
+                type: piecesToSpawn[j].piece,
+                color: this.chess.BLACK
+            };
 
-                if (this.chess.get(unoccupiedTopRowSquares[j]) && this.chess.get(unoccupiedTopRowSquares[j]).color === 'w') {
-                    spawnChance *= 2;
-                }
+            let spawnSquare: string = CommonHelper.getRandomElement(unoccupiedTopRowSquares);
+            
+            if (this.chess.get(spawnSquare)) {
+                this.chess.remove(spawnSquare);
+            }
+            this.chess.put(newPiece, spawnSquare);
 
-                if (chanceOfSpawningOnSquare <= spawnChance) {
-                
-                    let newPiece: any = {
-                        type: piece,
-                        color: this.chess.BLACK
-                    };
-                    
-                    // remove player pieces if an AI piece spawns on top of them
-                    if (this.chess.get(unoccupiedTopRowSquares[j])) {
-                        this.chess.remove(unoccupiedTopRowSquares[j]);
-                    }
-                    this.chess.put(newPiece, unoccupiedTopRowSquares[j]);
-                    
-                    // tell the state of the pieces that were added for its log
-                    store.dispatch({
-                        type: ADD_AI_PIECES_MOVED,
-                        pieceAdded: newPiece.type
-                    });
-
-                    numberOfPiecesSpawned++;
-
-                    break;
-                }
-
-            }         
+            unoccupiedTopRowSquares = unoccupiedTopRowSquares.filter(s => s !== spawnSquare);
+            
+            // tell the state of the pieces that were added for its log
+            store.dispatch({
+                type: ADD_AI_PIECES_MOVED,
+                pieceAdded: newPiece.type
+            });
 
         }
+        
+    }
 
-        if (roundNumber === 0 && numberOfPiecesSpawned === 0) {
-            this.addAIPieces();
+    private getPiecesToSpawn = (): PieceDetail[] => {
+
+        let piecesToSpawn: PieceDetail[] = [];
+        let numberOfPiecesToSpawn: number = 2 + (2 * Math.random());
+        for (let i: number = 0; i < numberOfPiecesToSpawn; i++) {
+            piecesToSpawn.push(CommonHelper.getRandomElement(this.pieceDetails));
         }
+
+        return piecesToSpawn;
 
     }
 

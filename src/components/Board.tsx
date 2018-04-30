@@ -13,14 +13,6 @@ export interface Props {
 
 class Board extends React.Component<Props, object> {
 
-    componentDidMount() {
-        console.log('Board componentDidMount');
-    }
-
-    componentDidUpdate(props: any, prevProps: any) {
-        console.log('Board componentDidUpdate');
-    }
-
     public render() {
 
         let { helper, gamePhase } = this.props;

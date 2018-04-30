@@ -25,7 +25,8 @@ export interface MoveDetails {
     columnDistance: number;
 }
 
-export interface SpawnChance {
+export interface PieceDetail {
     piece: string;
+    rating: number;
     chance: number;
 }
