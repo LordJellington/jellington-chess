@@ -1,6 +1,6 @@
 import store from '../store/store';
 import { MoveHelper } from './movehelper';
-import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED, SET_GAME_WON, ROUNDS_TO_WIN, COLUMNS } 
+import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED, SET_GAME_WON, ROUNDS_TO_WIN, COLUMNS, RESET_TURN_NUMBER } 
     from '../constants/index';
 import { GamePhase, PieceDetail } from '../types/index';
 import { CommonHelper } from './commonhelper';
@@ -27,6 +27,10 @@ export class BoardHelper {
     }
 
     public start = (): void => {
+
+        store.dispatch({
+            type: RESET_TURN_NUMBER
+        });
 
         let swapPieceColour: boolean = Math.random() < 0.5;
 
