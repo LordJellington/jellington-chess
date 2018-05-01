@@ -11,7 +11,7 @@ class TitleContainer extends React.Component<any, any> {
 
         return (
             <Title 
-                title="Chess Invaders! v0.00003"
+                title="Chess Invaders! v0.0.4"
                 onStartClick={
                     () => {
                         store.dispatch({

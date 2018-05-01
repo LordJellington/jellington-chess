@@ -1,6 +1,6 @@
 import store from '../store/store';
 import { MoveHelper } from './movehelper';
-import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED, SET_GAME_WON, ROUNDS_TO_WIN, COLUMNS, RESET_TURN_NUMBER } 
+import { RESET_SQUARES_MOVED_TO_ON_CURRENT_TURN, SET_PHASE, SET_BOARD_STATE_AT_TURN_START, INCREMENT_TURN_NUMBER, ADD_AI_PIECES_MOVED, SET_GAME_WON, ROUNDS_TO_WIN, COLUMNS, RESET_TURN_NUMBER, SET_GAME_MODE } 
     from '../constants/index';
 import { GamePhase, PieceDetail } from '../types/index';
 import { CommonHelper } from './commonhelper';
@@ -80,15 +80,7 @@ export class BoardHelper {
             return true;
         });
 
-        this.chess.load('8/8/8/8/8/8/8/8 w - - 0 1'); // empty board
-        this.board.position(this.chess.fen());
-
-        // set initial board state
-        this.chess.put({ type: this.chess.BISHOP, color: this.chess.WHITE }, 'c1');
-        this.chess.put({ type: this.chess.KNIGHT, color: this.chess.WHITE }, 'd1');
-        this.chess.put({ type: this.chess.QUEEN, color: this.chess.WHITE }, 'e1');
-        this.chess.put({ type: this.chess.ROOK, color: this.chess.WHITE }, 'f1');
-        this.board.position(this.chess.fen());
+        this.setInitialBoardState();
     }
 
     public resetTurn = (): void => {
@@ -140,6 +132,19 @@ export class BoardHelper {
         let move = moves[Math.floor(Math.random() * moves.length)];
         this.chess.move(move);
         console.log(this.chess.pgn());
+    }
+
+    public setGameMode = (selectElementId: string): void => {
+        let inputElement = (document.getElementById(selectElementId) as HTMLSelectElement);
+        let selectedIndex = inputElement.selectedIndex;
+        let option = inputElement.options.item(selectedIndex);
+        let value = option.value;
+        store.dispatch({
+            type: SET_GAME_MODE,
+            gameMode: value
+        });
+
+        this.setInitialBoardState();
     }
 
     private incrementTurnNumber = (): void => {
@@ -226,7 +231,16 @@ export class BoardHelper {
                 color: this.chess.BLACK
             };
 
-            let spawnSquare: string = CommonHelper.getRandomElement(unoccupiedTopRowSquares);
+            // if a top row square contains a white piece, then 50% chance that is used as the spawn square
+            let playerOccupiedSquare: string = '';
+            for (let i: number = 0; i < unoccupiedTopRowSquares.length; i++) {
+                let square = unoccupiedTopRowSquares[i];
+                if (this.chess.get(square) && Math.random() >= 0.5) {
+                    playerOccupiedSquare = square;
+                }
+            }
+
+            let spawnSquare: string = playerOccupiedSquare.length ? playerOccupiedSquare : CommonHelper.getRandomElement(unoccupiedTopRowSquares);
             
             if (this.chess.get(spawnSquare)) {
                 this.chess.remove(spawnSquare);
@@ -285,4 +299,29 @@ export class BoardHelper {
 
     }
 
+    private setInitialBoardState = (): void => {
+        this.chess.load('8/8/8/8/8/8/8/8 w - - 0 1'); // empty board
+        this.board.position(this.chess.fen());
+
+        let gameMode: string = store.getState().gameMode;
+
+        // set initial board state
+        if (gameMode === 'normal') {
+            this.chess.put({ type: this.chess.BISHOP, color: this.chess.WHITE }, 'c1');
+            this.chess.put({ type: this.chess.KNIGHT, color: this.chess.WHITE }, 'd1');
+            this.chess.put({ type: this.chess.QUEEN, color: this.chess.WHITE }, 'e1');
+            this.chess.put({ type: this.chess.ROOK, color: this.chess.WHITE }, 'f1');
+        } else if (gameMode === 'harder') {
+            this.chess.put({ type: this.chess.KNIGHT, color: this.chess.WHITE }, 'd1');
+            this.chess.put({ type: this.chess.QUEEN, color: this.chess.WHITE }, 'e1');
+            this.chess.put({ type: this.chess.ROOK, color: this.chess.WHITE }, 'f1');
+        } else if (gameMode === 'horsies') {
+            this.chess.put({ type: this.chess.KNIGHT, color: this.chess.WHITE }, 'c1');
+            this.chess.put({ type: this.chess.KNIGHT, color: this.chess.WHITE }, 'd1');
+            this.chess.put({ type: this.chess.KNIGHT, color: this.chess.WHITE }, 'e1');
+            this.chess.put({ type: this.chess.KNIGHT, color: this.chess.WHITE }, 'f1');
+        }      
+
+        this.board.position(this.chess.fen());
+    }
 }

@@ -1,8 +1,9 @@
-import { StoreState } from '../types/index';
+import { StoreState, GamePhase } from '../types/index';
 import * as React from 'react';
 import { connect } from 'react-redux';
 import { BoardHelper } from '../helpers/boardhelper';
 import Board from '../components/Board';
+import GameModeSelect from '../components/GameModeSelect';
 import { ROUNDS_TO_WIN } from '../constants';
 
 class BoardContainer extends React.Component<any, any> {
@@ -15,7 +16,7 @@ class BoardContainer extends React.Component<any, any> {
 
     public render() {
         
-        let { gamePhase, roundNumber } = this.props;
+        let { gamePhase, roundNumber, gameMode } = this.props;
 
         if (!this.boardHelper) {
             this.boardHelper = new BoardHelper();
@@ -32,7 +33,8 @@ class BoardContainer extends React.Component<any, any> {
 
         return (
         <div>
-            <span className="label label-default rounds-remaining">{roundsRemainingMessage}</span>
+            {(gamePhase === GamePhase.PLAYER_TURN || gamePhase === GamePhase.AI_TURN) && <span className="label label-default rounds-remaining">{roundsRemainingMessage}</span>}
+            {gamePhase === GamePhase.PLACEMENT && <GameModeSelect selectedMode={gameMode} onSelect={this.boardHelper.setGameMode} />}
             <Board
                 helper={this.boardHelper}
                 gamePhase={gamePhase}
@@ -45,7 +47,8 @@ class BoardContainer extends React.Component<any, any> {
 export function mapStateToProps (storeState: StoreState) {
     return {
         gamePhase: storeState.gamePhase,
-        roundNumber: storeState.roundNumber
+        roundNumber: storeState.roundNumber,
+        gameMode: storeState.gameMode
     };
 }
 

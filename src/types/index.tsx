@@ -13,6 +13,7 @@ export interface StoreState {
     aiPiecesAdded: string[];
     roundNumber: number;
     gameWon: boolean;
+    gameMode: string;
 }
 
 export interface MoveDetails {
