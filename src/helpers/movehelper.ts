@@ -66,6 +66,10 @@ export class MoveHelper {
 
     let { gamePhase } = store.getState();
 
+    if (gamePhase !== GamePhase.PLAYER_TURN && gamePhase !== GamePhase.PLACEMENT) {
+      return false;
+    }
+
     if (gamePhase === GamePhase.PLAYER_TURN && this.invalidMove(source, piece)) {
       return false;
     }

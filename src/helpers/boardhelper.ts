@@ -46,7 +46,7 @@ export class BoardHelper {
             draggable: true,
             pieceTheme: (piece: string) => {
                 if (swapPieceColour) {
-                    piece = (piece.charAt(0) === 'w' ? piece.replace('w', 'b') : piece.replace('b', 'w'));
+                    piece = (piece.charAt(0) === 'w' ? 'b' + piece.charAt(1) : 'w' + piece.charAt(1));
                 }
                 return 'assets/pieces/' + piece + '.png';
             },
