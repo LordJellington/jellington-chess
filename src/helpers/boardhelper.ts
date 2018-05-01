@@ -15,11 +15,11 @@ export class BoardHelper {
     private moveHelper: MoveHelper;
 
     private pieceDetails: PieceDetail[] = [
-        {piece: 'q', rating: 5, chance: 0.05},
-        {piece: 'n', rating: 4, chance: 0.2},
-        {piece: 'b', rating: 3, chance: 0.5},
-        {piece: 'r', rating: 2, chance: 0.35},
-        {piece: 'p', rating: 1, chance: 1.0}
+        {piece: 'q', rating: 4},
+        {piece: 'n', rating: 3},
+        {piece: 'r', rating: 2.5},
+        {piece: 'b', rating: 2},
+        {piece: 'p', rating: 1}
       ];
 
     constructor() {
@@ -191,9 +191,9 @@ export class BoardHelper {
         if (roundNumber % 2 === 0 && !addPiecesAnyway) {
             return;
         }
-
-        let pieceValueLowerThreshold: number = 0;
-        let pieceValueUpperThreshold: number = 2 + Math.floor((roundNumber - 1) * 0.5);
+        
+        let pieceValueUpperThreshold: number = Math.round(4 + ((roundNumber + 1) * 0.4));
+        let pieceValueLowerThreshold: number = Math.round(pieceValueUpperThreshold / 2);
 
         // find all of the squares in the top row that don't have an AI piece in them
         let topRowSquares: string[] = ['a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8'];
@@ -207,11 +207,12 @@ export class BoardHelper {
         let loopCounter: number = 0; 
         let piecesToSpawn: PieceDetail[] = this.getPiecesToSpawn();
         let totalRating: number = piecesToSpawn.map(p => p.rating).reduce((acc, v) => acc + v);
-        while (!(totalRating > pieceValueLowerThreshold && totalRating < pieceValueUpperThreshold) && loopCounter < 1000) {
+        while (!(totalRating > pieceValueLowerThreshold && totalRating < pieceValueUpperThreshold) && loopCounter < 10000) {
             piecesToSpawn = this.getPiecesToSpawn();
             totalRating = piecesToSpawn.map(p => p.rating).reduce((acc, v) => acc + v);
             loopCounter++;
         } 
+        console.log('totalRating', totalRating, pieceValueLowerThreshold, pieceValueUpperThreshold, loopCounter);
         
         if (loopCounter === 10000) {
             console.log('failed to generate piecesToSpawn array', pieceValueLowerThreshold, pieceValueUpperThreshold); // TODO: remove when no longer needed

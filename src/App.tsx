@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import BoardContainer from './containers/Board';
 import TitleContainer from './containers/Title';
 import GameOverContainer from './containers/GameOver';
+import InstructionsContainer from './containers/Instructions';
 import './App.css';
 
 class App extends React.Component<any, any> {
@@ -13,6 +14,7 @@ class App extends React.Component<any, any> {
     return (
       <div className="App">
         {gamePhase === GamePhase.TITLE && <TitleContainer/>}
+        {gamePhase === GamePhase.INSTRUCTIONS && <InstructionsContainer/>}
         {(gamePhase === GamePhase.PLACEMENT || gamePhase === GamePhase.AI_TURN || gamePhase === GamePhase.PLAYER_TURN) && <BoardContainer />}
         {gamePhase === GamePhase.GAME_OVER && <GameOverContainer />}
       </div>

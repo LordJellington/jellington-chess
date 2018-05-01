@@ -20,6 +20,14 @@ class TitleContainer extends React.Component<any, any> {
                         });
                     }
                 }
+                onInstructionsClick={
+                    () => {
+                        store.dispatch({
+                            type: SET_PHASE,
+                            gamePhase: GamePhase.INSTRUCTIONS 
+                        });  
+                    }
+                }
             />
         );
 

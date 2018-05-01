@@ -3,12 +3,10 @@
     max-height: 600px;
 }
 
-.instructions-wrapper {
-    margin-top: 50px;
-}
-
 .instructions-wrapper .instructions {
     text-align: left;
+    display: block;
+    padding-left: 5px;
 }
 
 .board-buttons-wrapper {
@@ -28,4 +26,18 @@
 
 .App {
     margin-top: 5px;
+}
+
+.title-buttons {
+    margin-top: 10px;
+}
+
+.title-buttons .btn {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.title-logo {
+    max-height: 300px;
+    max-width: 300px;
 }

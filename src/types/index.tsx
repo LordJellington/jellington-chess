@@ -1,9 +1,10 @@
 export enum GamePhase {
     TITLE = 0, 
-    PLACEMENT = 1,
-    PLAYER_TURN = 2,
-    AI_TURN = 3,
-    GAME_OVER = 4 
+    INSTRUCTIONS = 1,
+    PLACEMENT = 2,
+    PLAYER_TURN = 3,
+    AI_TURN = 4,
+    GAME_OVER = 5 
 }
 
 export interface StoreState {
@@ -29,5 +30,4 @@ export interface MoveDetails {
 export interface PieceDetail {
     piece: string;
     rating: number;
-    chance: number;
 }

@@ -211,7 +211,7 @@ export class MoveHelper {
     });
 
     // remove those that are too long for this game (i.e. greater than 4 spaces)
-    moveList = moveList.filter(m => m.rowDistance <= 4);
+    moveList = moveList.filter(m => m.rowDistance <= 4 && m.rowDistance >= -4 && m.columnDistance <= 4);
 
     // remove any pawn moves that are greater than 1 rowDistance or 0 columnDistance (as we are ignoring enpassant)
     moveList = moveList.filter(m => {
