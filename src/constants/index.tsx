@@ -16,4 +16,6 @@ export const SET_GAME_MODE: string = 'SET_GAME_MODE';
 
 export const COLUMNS: string[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
+export const AI_MOVE_TIME: number = 400;
+
 export const ROUNDS_TO_WIN: number = 20;

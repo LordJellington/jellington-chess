@@ -105,15 +105,17 @@ export class BoardHelper {
         } else {
 
             this.setAsAITurn();
-            this.moveHelper.makeAIMoves();
-    
-            // synchronise this.board and this.chess
-            this.board.position(this.chess.fen());
-    
-            this.addAIPieces();
+            this.moveHelper.makeAIMoves(() => {
 
-            this.setAsPlayersTurn();
-            this.incrementTurnNumber();
+                // synchronise this.board and this.chess
+                this.board.position(this.chess.fen());
+        
+                this.addAIPieces();
+
+                this.setAsPlayersTurn();
+                this.incrementTurnNumber();
+
+            });
 
         }
 
@@ -125,13 +127,6 @@ export class BoardHelper {
         this.addAIPieces(true);
         this.setAsPlayersTurn();
 
-    }
-
-    public randomMove = (): void => {
-        let moves = this.chess.moves();
-        let move = moves[Math.floor(Math.random() * moves.length)];
-        this.chess.move(move);
-        console.log(this.chess.pgn());
     }
 
     public setGameMode = (selectElementId: string): void => {
@@ -212,10 +207,8 @@ export class BoardHelper {
             totalRating = piecesToSpawn.map(p => p.rating).reduce((acc, v) => acc + v);
             loopCounter++;
         } 
-        console.log('totalRating', totalRating, pieceValueLowerThreshold, pieceValueUpperThreshold, loopCounter);
         
         if (loopCounter === 10000) {
-            console.log('failed to generate piecesToSpawn array', pieceValueLowerThreshold, pieceValueUpperThreshold); // TODO: remove when no longer needed
             return;
         }
          

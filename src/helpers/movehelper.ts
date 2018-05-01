@@ -1,6 +1,6 @@
 import store from '../store/store';
 import { GamePhase, MoveDetails } from '../types/index';
-import { ADD_SQUARE_MOVED_TO, COLUMNS } from '../constants/index';
+import { ADD_SQUARE_MOVED_TO, COLUMNS, AI_MOVE_TIME } from '../constants/index';
 
 declare var $: any;
 
@@ -246,38 +246,54 @@ export class MoveHelper {
 
   }
 
-  makeAIMoves = () => {
+  makeAIMoves = (callback: () => void) => {
 
-    let invalidTargetSquares: string[] = [];
-
-    // check possible moves for each AI piece    
-    for (let i = 0; i < COLUMNS.length; i++) {
-      
-      for (let j = 2; j <= 8; j++) { // exclude row 1, because the game will end if AI reaches there
-      
-        let square: string = COLUMNS[i] + j.toString();        
-
-        if (this.game.get(square) && this.game.get(square).color === 'b' && invalidTargetSquares.indexOf(square) < 0) {
-      
-          let possibleMoves: any[] = this.game.moves({square: square, verbose: true, legal: false});
-          // make a move for each AI piece
-          if (possibleMoves && possibleMoves.length) {
-      
-            let selectedMove: MoveDetails | null = this.selectMove(square, possibleMoves);        
-
-            if (selectedMove) {
-              invalidTargetSquares.push(selectedMove.targetSquare);
-              this.board.move(selectedMove.source + '-' + selectedMove.targetSquare);
-              this.setNextTurnTaker('b', true, this.board.fen());
-            }
-      
-          }
-        }
-      
-      }
-
-    }
+    this.makeAIMove(0, 0, [], callback);
 
   }
+
+  makeAIMove = (col: number, row: number, invalidTargetSquares: string[], callback: () => void) => {
+    
+    let timeout: number = 0;
+    let square: string = COLUMNS[col] + row.toString(); 
+    
+    if (this.game.get(square) && this.game.get(square).color === 'b' && invalidTargetSquares.indexOf(square) < 0) {
+    
+      let possibleMoves: any[] = this.game.moves({square: square, verbose: true, legal: false});
+    
+      // make a move for each AI piece
+      if (possibleMoves && possibleMoves.length) {
+            
+        let selectedMove: MoveDetails | null = this.selectMove(square, possibleMoves);        
+
+        if (selectedMove) {
+          invalidTargetSquares.push(selectedMove.targetSquare);
+          timeout = AI_MOVE_TIME;
+          this.board.move(selectedMove.source + '-' + selectedMove.targetSquare);
+          this.setNextTurnTaker('b', true, this.board.fen());
+        }
+
+      }
+    
+    }
+
+    setTimeout(
+      () => {
+        let nextRow: number = row + 1;
+        let nextCol: number = col;
+        if (nextRow > 8) {
+          nextCol++;
+          nextRow = 0;
+        }
+        if (nextCol === COLUMNS.length) {
+          callback();
+        } else {
+          this.makeAIMove(nextCol, nextRow, invalidTargetSquares, callback);
+        }
+      }, 
+      timeout
+  );
+
+  } 
 
 }
